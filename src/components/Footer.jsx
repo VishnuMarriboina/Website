@@ -23,7 +23,7 @@ export default function Footer() {
               <ul className="text-gray-500 font-medium">
                 <li>
                   <Link to="/" className="hover:underline">
-                    Discord
+                    What's Up
                   </Link>
                 </li>
               </ul>
