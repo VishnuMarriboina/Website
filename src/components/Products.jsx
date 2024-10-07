@@ -27,68 +27,93 @@ function Products(){
     
     <h1 className='mt-6 font-bold'>Product Name:</h1><p>60mm Stone Aggregates</p>
     <h1 className='mt-3 font-bold'>Application:</h1><p>Often used in projects like dams and retaining walls.</p>
-     <button className='bg-indigo-400 rounded-lg p-3 mt-6 '>Buy Now</button>
+     <button className='bg-indigo-400 rounded-lg p-3 mt-6  hover:scale-110 hover:bg-indigo-200 hover:font-semibold hover:text-black'
+     onClick={() => alert('You clicked Buy Now!')}>
+      Buy Now</button>
 
    </div >
    <div className=" rounded-xl p-4 shadow-xl hover:scale-105 hover:bg-slate-50">
     <img src={a2} alt="" className='rounded-xl border-2 mx-auto mt-5'/>
     <h1 className='mt-6 font-bold'>Product Name:</h1><p>40mm Stone Aggregates</p>
     <h1 className='mt-3 font-bold'>Application:</h1><p>Commonly used in foundations and road sub-bases.</p>
-     <button className='bg-indigo-400 rounded-lg p-3 mt-4'>Buy Now</button></div>
+     <button className='bg-indigo-400 rounded-lg p-3 mt-4 hover:scale-110 hover:bg-indigo-200 hover:font-semibold hover:text-black'
+     onClick={() => alert('You clicked Buy Now!')}>
+      Buy Now</button></div>
 
 
    <div className=" rounded-xl p-4 shadow-xl hover:scale-105 hover:bg-slate-50">
     <img src={a3} alt="" className='rounded-xl  border-2 mx-auto mt-5'/>
     <h1 className='mt-6 font-bold'>Product Name:</h1><p>20mm Stone Aggregates</p>
     <h1 className='mt-3 font-bold'>Application:</h1><p>Used in concrete mixes and asphalt production.</p>
-     <button className='bg-indigo-400 rounded-lg p-3 mt-4 '>Buy Now</button></div>
+     <button className='bg-indigo-400 rounded-lg p-3 mt-4 hover:scale-110 hover:bg-indigo-200 hover:font-semibold hover:text-black '
+     onClick={() => alert('You clicked Buy Now!')}>
+      Buy Now</button></div>
 
 
    <div className=" rounded-xl p-4 shadow-xl hover:scale-105 hover:bg-slate-50">
     <img src={a4} alt="" className='rounded-xl  border-2 mx-auto mt-5'/>
     <h1 className='mt-6 font-bold'>Product Name:</h1><p>12mm Stone Aggregates</p>
     <h1 className='mt-3 font-bold'>Application:</h1><p>Widely used in reinforced concrete projects.</p>
-     <button className='bg-indigo-400 rounded-lg p-3 mt-9 mb-14'>Buy Now</button></div>
+     <button className='bg-indigo-400 rounded-lg p-3 mt-9 mb-14 hover:scale-110 hover:bg-indigo-200 hover:font-semibold hover:text-black'
+     onClick={() => alert('You clicked Buy Now!')}>
+      Buy Now</button></div>
 
 
    <div className="  rounded-xl p-4 shadow-xl hover:scale-105 hover:bg-slate-50"> 
     <img src={a5} alt="" className='rounded-xl  border-2 mx-auto mt-5'/>
     <h1 className='mt-6 font-bold'>Product Name:</h1><p>6mm Stone Aggregates</p>
     <h1 className='mt-3 font-bold'>Application:</h1><p>Used in concrete mixes for finer textures, especially in paving blocks</p>
-     <button className='bg-indigo-400 rounded-lg p-3 mt-4 '>Buy Now</button></div>
+     <button className='bg-indigo-400 rounded-lg p-3 mt-4 hover:scale-110 hover:bg-indigo-200 hover:font-semibold hover:text-black'
+     onClick={() => alert('You clicked Buy Now!')}>
+      Buy Now</button></div>
 
 
    <div className=" rounded-xl p-4 shadow-xl hover:scale-105 hover:bg-slate-50">
     <img src={a6} alt="" className='rounded-xl  border-2 mx-auto h-[40%] mt-5'/>
     <h1 className='mt-6 font-bold'>Product Name:</h1><p>Manufactured Sand(M-Sand)</p>
     <h1 className='mt-3 font-bold'>Application:</h1><p>M-Sand is a artificial sand created by crushing hard materials into small, angular</p>
-     <button className='bg-indigo-400 rounded-lg p-3 mt-4'>Buy Now</button></div>
+     <button className='bg-indigo-400 rounded-lg p-3 mt-4 hover:scale-110 hover:bg-indigo-200 hover:font-semibold hover:text-black'
+     onClick={() => alert('You clicked Buy Now!')}>
+      Buy Now</button></div>
 
 
    <div className=" rounded-xl p-4 shadow-xl hover:scale-105 h-[600px] hover:bg-slate-50">
     <img src={a7} alt="" className='rounded-xl  border-2 mx-auto mt-5 h-[40%]'/>
     <h1 className='mt-6 font-bold'>Product Name:</h1><p>Dust (Stone Dust or Filler)</p>
     <h1 className='mt-3 font-bold'>Application:</h1><p>Commonly used as a base for patios, walkways, and driveways, providing stability and a level surface.</p>
-     <button className='bg-indigo-400 rounded-lg p-3 mt-4'>Buy Now</button></div>
+     <button className='bg-indigo-400 rounded-lg p-3 mt-4 hover:scale-110 hover:bg-indigo-200 hover:font-semibold hover:text-black'
+     onClick={() => alert('You clicked Buy Now!')}>
+      Buy Now</button></div>
 
 
 <div className=" rounded-xl p-4 shadow-xl hover:scale-105 hover:bg-slate-50">
     <img src={a9} alt="" className='rounded-xl  border-2 mx-auto mt-5 h-[40%]'/>
     <h1 className='mt-6 font-bold'>Product Name:</h1><p>Wetmix</p>
     <h1 className='mt-3 font-bold'>Application:</h1><p>Essential layers in road construction. Wetmix provides a strong.</p>
-     <button className='bg-indigo-400 rounded-lg p-3 mt-4'>Buy Now</button></div>
+     <button className='bg-indigo-400 rounded-lg p-3 mt-4 hover:scale-110 hover:bg-indigo-200 hover:font-semibold hover:text-black'
+     onClick={() => alert('You clicked Buy Now!')}>
+     Buy Now</button></div>
 
      <div className=" rounded-xl p-4 shadow-xl hover:scale-105 hover:bg-slate-50">
     <img src={a8} alt="" className='rounded-xl  border-2 mx-auto mt-5 h-[40%]'/>
     <h1 className='mt-6 font-bold'>Product Name:</h1><p>GSB (granular Sub Base)</p>
     <h1 className='mt-3 font-bold'>Application:</h1><p>Essential layers in road construction. GSB forms the load-bearing.</p>
-     <button className='bg-indigo-400 rounded-lg p-3 mt-4'>Buy Now</button></div>
+     <button className='bg-indigo-400 rounded-lg p-3 mt-4 hover:scale-110 hover:bg-indigo-200 hover:font-semibold hover:text-black'
+     onClick={() => alert('You clicked Buy Now!')}>
+      Buy Now</button></div>
 
      <div className=" rounded-xl p-4 shadow-xl hover:scale-105 hover:bg-slate-50">
     <img src={a10} alt="" className='rounded-xl  border-2 mx-auto mt-5 h-[40%]'/>
     <h1 className='mt-6 font-bold'>Product Name:</h1><p>gravel</p>
     <h1 className='mt-3 font-bold'>Application:</h1><p>Widely used in landscaping, as well as in the construction of roads and walkways.</p>
-     <button className='bg-indigo-400 rounded-lg p-3 mt-4'>Buy Now</button>
+     {/* <button className='bg-indigo-400 rounded-lg p-3 mt-4'>Buy Now</button> */}
+     <button 
+  className='bg-indigo-400 rounded-lg p-3 mt-4 hover:scale-110 hover:bg-indigo-200 hover:font-semibold hover:text-black' 
+  onClick={() => alert('You clicked Buy Now!')}
+>
+  Buy Now
+</button>
+
      </div>
 </div> 
     </>)

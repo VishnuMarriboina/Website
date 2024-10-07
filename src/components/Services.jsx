@@ -29,37 +29,44 @@ function Services(){
     <img src={f1} alt="" className='rounded-xl border-2'/>
     
     <h1 className='mt-12 font-semibold'>Job Description:</h1><p>Front-end Developer will work on the Web 2.0 and 3.0 project</p>
-     <button className='bg-indigo-400 rounded-lg p-3 '>Apply</button>
+     <button className='bg-indigo-400 rounded-lg p-3  hover:scale-110 hover:bg-indigo-200 hover:font-semibold hover:text-black'
+     onClick={()=>alert("Thank You!!")}>Apply</button>
 
    </div >
    <div className=" rounded-xl p-4 shadow-xl hover:scale-105">
     <img src={b1} alt="" className='rounded-xl'/>
     
     <h1 className='font-semibold'>Job Description:</h1><p>Back-end Developer will work on the Web 2.0 and 3.0 project</p>
-     <button className='bg-indigo-400 rounded-lg p-3 '>Apply</button></div>
+     <button className='bg-indigo-400 rounded-lg p-3  hover:scale-110 hover:bg-indigo-200 hover:font-semibold hover:text-black'
+     onClick={()=>alert("Thank You!!")}>Apply</button></div>
    <div className=" rounded-xl p-4 shadow-xl hover:scale-105">
     <img src={q1} alt="" className='rounded-xl'/>
     <h1 className='font-semibold'>Job Description:</h1><p>Enhance and optimize automated testing framework</p>
-     <button className='bg-indigo-400 rounded-lg p-3 '>Apply</button></div>
+     <button className='bg-indigo-400 rounded-lg p-3 hover:scale-110 hover:bg-indigo-200 hover:font-semibold hover:text-black '
+     onClick={()=>alert("Thank You!!")}>Apply</button></div>
    <div className=" rounded-xl p-4 shadow-xl hover:scale-105">
     <img src={se} alt="" className='rounded-xl'/>
     
     <h1 className='font-semibold'>Job Description:</h1><p>Analyzing the reports and customer surveys</p>
-     <button className='bg-indigo-400 rounded-lg p-3 '>Apply</button></div>
+     <button className='bg-indigo-400 rounded-lg p-3  hover:scale-110 hover:bg-indigo-200 hover:font-semibold hover:text-black'
+     onClick={()=>alert("Thank You!!")}>Apply</button></div>
    <div className="  rounded-xl p-4 shadow-xl hover:scale-105"> 
     <img src={pm1} alt="" className='rounded-xl'/>
     
     <h1 className='font-semibold'>Job Description:</h1><p>Manage and oversee multiple projects within the program portfolio</p>
-     <button className='bg-indigo-400 rounded-lg p-3 '>Apply</button></div>
+     <button className='bg-indigo-400 rounded-lg p-3  hover:scale-110 hover:bg-indigo-200 hover:font-semibold hover:text-black'
+     onClick={()=>alert("Thank You!!")}>Apply</button></div>
    <div className=" rounded-xl p-4 shadow-xl hover:scale-105">
     <img src={ba1} alt="" className='rounded-xl '/>
     
     <h1 className='font-semibold'>Job Description:</h1><p>Propose and implement streamlined processes to enhance efficiency</p>
-     <button className='bg-indigo-400 rounded-lg p-3 '>Apply</button></div>
+     <button className='bg-indigo-400 rounded-lg p-3  hover:scale-110 hover:bg-indigo-200 hover:font-semibold hover:text-black'
+     onClick={()=>alert("Thank you!!")}>Apply</button></div>
    <div className=" rounded-xl p-4 shadow-xl hover:scale-105">
     <img src={op} alt="" className='rounded-xl'/>
     <h1 className='font-semibold'>Job Description:</h1><p>Experience in management operations and leadership</p>
-     <button className='bg-indigo-400 rounded-lg p-3 '>Apply</button></div>
+     <button className='bg-indigo-400 rounded-lg p-3   hover:bg-indigo-200 hover:font-semibold hover:text-black'
+     onClick={()=>alert("Thank you!!")}>Apply</button></div>
 </div>    
 </>)
 }
