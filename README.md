@@ -7,11 +7,7 @@ Vite
 
 React Router
 
-Axios
 
-Context API / Redux (if used)
-
-Tailwind / CSS / MUI (according to your project)
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
