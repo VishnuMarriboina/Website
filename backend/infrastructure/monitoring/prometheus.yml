@@ -1,0 +1,25 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+rule_files: []
+
+scrape_configs:
+  - job_name: 'grpc-web-proxy'
+    static_configs:
+      - targets: ['grpc-web-proxy:8080']
+    metrics_path: /metrics
+
+  - job_name: 'service-a'
+    static_configs:
+      - targets: ['service-a:50051']
+    metrics_path: /metrics
+
+  - job_name: 'service-b'
+    static_configs:
+      - targets: ['service-b:50052']
+    metrics_path: /metrics
+
+  - job_name: 'mongodb'
+    static_configs:
+      - targets: ['mongodb-exporter:9216']

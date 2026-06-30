@@ -1,0 +1,106 @@
+version: '3.8'
+
+# ──────────────────────────────────────────────────────────
+# Full-gRPC stack: gRPC-Web Proxy + gRPC microservices
+# No REST layer — browser speaks gRPC-Web protocol
+# ──────────────────────────────────────────────────────────
+
+services:
+
+  # ── MongoDB ──────────────────────────────────────────────
+  mongodb:
+    image: mongo:7.0-jammy
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE:      myData
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - ms-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout:  10s
+      retries:  5
+
+  # ── Service A (gRPC only — no HTTP server) ────────────────
+  service-a:
+    build:
+      context:    .
+      dockerfile: services/service-a/Dockerfile
+    container_name: service-a
+    restart: unless-stopped
+    ports:
+      - "50051:50051"
+    environment:
+      NODE_ENV:               production
+      SERVICE_A_GRPC_PORT:    50051
+      MONGODB_URI:            mongodb://root:password@mongodb:27017/myData?authSource=admin
+      SERVICE_B_GRPC_HOST:    service-b
+      SERVICE_B_GRPC_PORT:    50052
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - ms-network
+
+  # ── Service B (gRPC only — no HTTP server) ────────────────
+  service-b:
+    build:
+      context:    .
+      dockerfile: services/service-b/Dockerfile
+    container_name: service-b
+    restart: unless-stopped
+    ports:
+      - "50052:50052"
+    environment:
+      NODE_ENV:               production
+      SERVICE_B_GRPC_PORT:    50052
+      MONGODB_URI:            mongodb://root:password@mongodb:27017/myData?authSource=admin
+      SERVICE_A_GRPC_HOST:    service-a
+      SERVICE_A_GRPC_PORT:    50051
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - ms-network
+
+  # ── gRPC-Web Proxy (browser ↔ gRPC bridge) ───────────────
+  grpc-web-proxy:
+    build:
+      context:    .
+      dockerfile: grpc-web-proxy/Dockerfile
+    container_name: grpc-web-proxy
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      NODE_ENV:             production
+      PORT:                 8080
+      CORS_ORIGIN:          http://localhost:5173
+      SERVICE_A_GRPC_HOST:  service-a
+      SERVICE_A_GRPC_PORT:  50051
+      SERVICE_B_GRPC_HOST:  service-b
+      SERVICE_B_GRPC_PORT:  50052
+    depends_on:
+      - service-a
+      - service-b
+    networks:
+      - ms-network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 30s
+      timeout:  10s
+      retries:  3
+
+networks:
+  ms-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

@@ -1,0 +1,28 @@
+'use strict';
+
+import path from 'path';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: path.join(__dirname, '../../../.env') });
+
+import { connectDB, disconnectDB } from './config/database';
+import { startGrpcServer } from './grpc/server';
+
+const bootstrap = async (): Promise<void> => {
+  await connectDB();
+  await startGrpcServer();
+
+  const shutdown = async (signal: string): Promise<void> => {
+    console.log(`[service-b] ${signal} — shutting down`);
+    await disconnectDB();
+    process.exit(0);
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT',  () => shutdown('SIGINT'));
+};
+
+bootstrap().catch((err: Error) => {
+  console.error('[service-b] Startup failed:', err);
+  process.exit(1);
+});

@@ -1,0 +1,566 @@
+{
+  "info": {
+    "name": "Microservices gRPC API",
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "description": "Complete gRPC API collection. Import into Postman and use the gRPC request type.\n\nBase addresses:\n  Service A: localhost:50051\n  Service B: localhost:50052\n\nFor each request, set proto file path to backend/proto/service-a.proto or service-b.proto.\n\nSeed credentials:\n  Admin:  admin@example.com / Admin@123\n  Users:  user1@example.com … user10@example.com / User@1234",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "serviceA", "value": "localhost:50051", "type": "string" },
+    { "key": "serviceB", "value": "localhost:50052", "type": "string" },
+    { "key": "adminToken", "value": "", "type": "string" },
+    { "key": "userToken",  "value": "", "type": "string" },
+    { "key": "productId",  "value": "", "type": "string" },
+    { "key": "orderId",    "value": "", "type": "string" },
+    { "key": "jobId",      "value": "", "type": "string" },
+    { "key": "appId",      "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Service A — Auth",
+      "item": [
+        {
+          "name": "AdminLogin",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/AdminLogin",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Admin@123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Returns JWT with role=ADMIN. Copy token to {{adminToken}}."
+          },
+          "response": []
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/Register",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Test@1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/Login",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"User@1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Returns JWT with role=USER. Copy token to {{userToken}}."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Service A — Products (public)",
+      "item": [
+        {
+          "name": "GetProducts",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/GetProducts",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 10,\n  \"status\": \"active\",\n  \"category\": \"\",\n  \"search\": \"\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetProductById",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/GetProductById",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{productId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Service A — Products (admin)",
+      "item": [
+        {
+          "name": "CreateProduct",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/CreateProduct",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"20mm Aggregate\",\n  \"description\": \"Premium 20mm crushed stone\",\n  \"category\": \"Aggregates\",\n  \"image\": \"\",\n  \"price\": 150,\n  \"stock\": 1000,\n  \"status\": \"active\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UpdateProduct",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/UpdateProduct",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{productId}}\",\n  \"price\": 175,\n  \"stock\": 800\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ActivateProduct",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/ActivateProduct",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{productId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DeactivateProduct",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/DeactivateProduct",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{productId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DeleteProduct",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/DeleteProduct",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{productId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Service A — Orders",
+      "item": [
+        {
+          "name": "CreateOrder  [USER]",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/CreateOrder",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{userToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 2\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "401 UNAUTHENTICATED if no token: 'Please login to purchase products.'"
+          },
+          "response": []
+        },
+        {
+          "name": "GetUserOrders  [USER/ADMIN]",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/GetUserOrders",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{userToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"\",\n  \"page\": 1,\n  \"limit\": 10\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "USER sees own orders. ADMIN can pass userId to see any user's orders."
+          },
+          "response": []
+        },
+        {
+          "name": "GetOrders  [ADMIN]",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/GetOrders",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 10,\n  \"orderStatus\": \"\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetOrderById  [ADMIN]",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/GetOrderById",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{orderId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Service A — Legacy Items",
+      "item": [
+        {
+          "name": "HealthCheck",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/HealthCheck",
+            "header": [],
+            "body": { "mode": "raw", "raw": "{}", "options": { "raw": { "language": "json" } } }
+          },
+          "response": []
+        },
+        {
+          "name": "GetAll",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/GetAll",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 10\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetById",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/GetById",
+            "header": [],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": \"\"\n}", "options": { "raw": { "language": "json" } } }
+          },
+          "response": []
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/Create",
+            "header": [],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Item 1\",\n  \"value\": \"100\"\n}", "options": { "raw": { "language": "json" } } }
+          },
+          "response": []
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/Update",
+            "header": [],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": \"\",\n  \"name\": \"Updated\"\n}", "options": { "raw": { "language": "json" } } }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceA}}/servicea.ServiceA/Delete",
+            "header": [],
+            "body": { "mode": "raw", "raw": "{\n  \"id\": \"\"\n}", "options": { "raw": { "language": "json" } } }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Service B — Jobs (public)",
+      "item": [
+        {
+          "name": "GetJobs",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceB}}/serviceb.ServiceB/GetJobs",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 10,\n  \"status\": \"active\",\n  \"department\": \"\",\n  \"search\": \"\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetJobById",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceB}}/serviceb.ServiceB/GetJobById",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{jobId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Service B — Jobs (admin)",
+      "item": [
+        {
+          "name": "CreateJob",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceB}}/serviceb.ServiceB/CreateJob",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Backend Engineer\",\n  \"description\": \"Node.js/TypeScript role\",\n  \"department\": \"Engineering\",\n  \"location\": \"Remote\",\n  \"experienceRequired\": \"3+ years\",\n  \"salaryRange\": \"80000-120000\",\n  \"status\": \"active\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UpdateJob",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceB}}/serviceb.ServiceB/UpdateJob",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{jobId}}\",\n  \"salaryRange\": \"90000-130000\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ActivateJob",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceB}}/serviceb.ServiceB/ActivateJob",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{jobId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DeactivateJob",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceB}}/serviceb.ServiceB/DeactivateJob",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{jobId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DeleteJob",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceB}}/serviceb.ServiceB/DeleteJob",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{jobId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Service B — Applications",
+      "item": [
+        {
+          "name": "CreateApplication  [USER]",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceB}}/serviceb.ServiceB/CreateApplication",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{userToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jobId\": \"{{jobId}}\",\n  \"resumeUrl\": \"https://example.com/resume.pdf\",\n  \"coverLetter\": \"I am a great fit for this role.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "401 UNAUTHENTICATED if no token: 'Please login to apply for jobs.'\n409 ALREADY_EXISTS if user already applied to this job."
+          },
+          "response": []
+        },
+        {
+          "name": "GetUserApplications  [USER/ADMIN]",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceB}}/serviceb.ServiceB/GetUserApplications",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{userToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"\",\n  \"page\": 1,\n  \"limit\": 10\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetApplicationById  [AUTH]",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceB}}/serviceb.ServiceB/GetApplicationById",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{userToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{appId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetApplications  [ADMIN]",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceB}}/serviceb.ServiceB/GetApplications",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"page\": 1,\n  \"limit\": 10,\n  \"applicationStatus\": \"\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetJobApplications  [ADMIN]",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceB}}/serviceb.ServiceB/GetJobApplications",
+            "header": [
+              { "key": "authorization", "value": "Bearer {{adminToken}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{jobId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Service B — Legacy Records",
+      "item": [
+        {
+          "name": "HealthCheck",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceB}}/serviceb.ServiceB/HealthCheck",
+            "header": [],
+            "body": { "mode": "raw", "raw": "{}", "options": { "raw": { "language": "json" } } }
+          },
+          "response": []
+        },
+        {
+          "name": "GetAll",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceB}}/serviceb.ServiceB/GetAll",
+            "header": [],
+            "body": { "mode": "raw", "raw": "{\n  \"page\": 1,\n  \"limit\": 10\n}", "options": { "raw": { "language": "json" } } }
+          },
+          "response": []
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "url": "grpc://{{serviceB}}/serviceb.ServiceB/Create",
+            "header": [],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Record 1\",\n  \"content\": \"Content here\"\n}", "options": { "raw": { "language": "json" } } }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

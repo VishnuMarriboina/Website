@@ -1,0 +1,219 @@
+syntax = "proto3";
+
+package serviceb;
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Service B — Record (legacy), Job, Application
+// ──────────────────────────────────────────────────────────────────────────────
+
+service ServiceB {
+  // ── Health ──────────────────────────────────────────────────────────────────
+  rpc HealthCheck          (HealthCheckRequest)         returns (HealthCheckResponse);
+
+  // ── Legacy Record (backward-compatible) ─────────────────────────────────────
+  rpc GetById              (GetByIdRequest)             returns (RecordResponse);
+  rpc GetAll               (GetAllRequest)              returns (GetAllResponse);
+  rpc Create               (CreateRecordRequest)        returns (RecordResponse);
+  rpc Update               (UpdateRecordRequest)        returns (RecordResponse);
+  rpc Delete               (DeleteRecordRequest)        returns (StatusResponse);
+
+  // ── Job Management ───────────────────────────────────────────────────────────
+  rpc GetJobs              (GetJobsRequest)             returns (GetJobsResponse);
+  rpc GetJobById           (GetByIdRequest)             returns (JobResponse);
+  rpc CreateJob            (CreateJobRequest)           returns (JobResponse);
+  rpc UpdateJob            (UpdateJobRequest)           returns (JobResponse);
+  rpc DeleteJob            (DeleteRecordRequest)        returns (StatusResponse);
+  rpc ActivateJob          (GetByIdRequest)             returns (JobResponse);
+  rpc DeactivateJob        (GetByIdRequest)             returns (JobResponse);
+
+  // ── Job Application ──────────────────────────────────────────────────────────
+  rpc CreateApplication    (CreateApplicationRequest)   returns (ApplicationResponse);
+  rpc GetApplicationById   (GetByIdRequest)             returns (ApplicationResponse);
+  rpc GetApplications      (GetApplicationsRequest)     returns (GetApplicationsResponse);
+  rpc GetUserApplications  (GetUserAppRequest)          returns (GetApplicationsResponse);
+  rpc GetJobApplications        (GetByIdRequest)                    returns (GetApplicationsResponse);
+  rpc UpdateApplicationStatus   (UpdateApplicationStatusRequest)    returns (ApplicationResponse);
+  rpc DeleteApplication         (GetByIdRequest)                    returns (StatusResponse);
+}
+
+// ── Messages ──────────────────────────────────
+
+message Record {
+  string id          = 1;
+  string title       = 2;
+  string content     = 3;
+  string status      = 4;
+  string refId       = 5;
+  string createdAt   = 6;
+  string updatedAt   = 7;
+}
+
+message GetByIdRequest {
+  string id = 1;
+}
+
+message GetAllRequest {
+  int32  page   = 1;
+  int32  limit  = 2;
+  string status = 3;
+  string refId  = 4;
+}
+
+message CreateRecordRequest {
+  string title   = 1;
+  string content = 2;
+  string status  = 3;
+  string refId   = 4;
+}
+
+message UpdateRecordRequest {
+  string id      = 1;
+  string title   = 2;
+  string content = 3;
+  string status  = 4;
+}
+
+message DeleteRecordRequest {
+  string id = 1;
+}
+
+message RecordResponse {
+  bool   success = 1;
+  string message = 2;
+  Record data    = 3;
+}
+
+message GetAllResponse {
+  bool            success = 1;
+  string          message = 2;
+  repeated Record data    = 3;
+  PaginationMeta  meta    = 4;
+}
+
+message PaginationMeta {
+  int32 total      = 1;
+  int32 page       = 2;
+  int32 limit      = 3;
+  int32 totalPages = 4;
+  bool  hasNext    = 5;
+  bool  hasPrev    = 6;
+}
+
+message StatusResponse {
+  bool   success = 1;
+  string message = 2;
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  string status    = 1;
+  string service   = 2;
+  string timestamp = 3;
+}
+
+// ── Job messages ─────────────────────────────────────────────────────────────
+
+message Job {
+  string id                 = 1;
+  string title              = 2;
+  string description        = 3;
+  string department         = 4;
+  string location           = 5;
+  string experienceRequired = 6;
+  string salaryRange        = 7;
+  string status             = 8;
+  string createdAt          = 9;
+  string updatedAt          = 10;
+}
+
+message GetJobsRequest {
+  int32  page       = 1;
+  int32  limit      = 2;
+  string status     = 3;
+  string department = 4;
+  string search     = 5;
+}
+
+message CreateJobRequest {
+  string title              = 1;
+  string description        = 2;
+  string department         = 3;
+  string location           = 4;
+  string experienceRequired = 5;
+  string salaryRange        = 6;
+  string status             = 7;
+}
+
+message UpdateJobRequest {
+  string id                 = 1;
+  string title              = 2;
+  string description        = 3;
+  string department         = 4;
+  string location           = 5;
+  string experienceRequired = 6;
+  string salaryRange        = 7;
+  string status             = 8;
+}
+
+message JobResponse {
+  bool   success = 1;
+  string message = 2;
+  Job    data    = 3;
+}
+
+message GetJobsResponse {
+  bool          success = 1;
+  string        message = 2;
+  repeated Job  data    = 3;
+  PaginationMeta meta   = 4;
+}
+
+// ── Application messages ─────────────────────────────────────────────────────
+
+message Application {
+  string id                = 1;
+  string userId            = 2;
+  string jobId             = 3;
+  string resumeUrl         = 4;
+  string coverLetter       = 5;
+  string applicationStatus = 6;
+  string createdAt         = 7;
+}
+
+message CreateApplicationRequest {
+  string userId      = 1;
+  string jobId       = 2;
+  string resumeUrl   = 3;
+  string coverLetter = 4;
+}
+
+message ApplicationResponse {
+  bool        success = 1;
+  string      message = 2;
+  Application data    = 3;
+}
+
+message GetApplicationsRequest {
+  int32  page              = 1;
+  int32  limit             = 2;
+  string applicationStatus = 3;
+}
+
+message GetUserAppRequest {
+  string userId = 1;
+  int32  page   = 2;
+  int32  limit  = 3;
+}
+
+message GetApplicationsResponse {
+  bool                  success = 1;
+  string                message = 2;
+  repeated Application  data    = 3;
+  PaginationMeta        meta    = 4;
+}
+
+message UpdateApplicationStatusRequest {
+  string id                = 1;
+  string applicationStatus = 2;
+}

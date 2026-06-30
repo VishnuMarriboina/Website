@@ -1,5 +1,36 @@
+# ─────────────────────────────────────────────
+#  Root .gitignore — covers frontend/ & backend/
+# ─────────────────────────────────────────────
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+dist-ssr/
+build/
+out/
+**/dist/
+**/build/
+**/out/
+
+# Environment variables — ignore all .env* except .example files
+.env
+.env.*
+.env.local
+.env.*.local
+**/.env
+**/.env.*
+**/.env.local
+**/.env.*.local
+!.env.example
+!**/.env.example
+!.env.*.example
+!**/.env.*.example
+
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,18 +38,53 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Vite (frontend)
+.vite/
+**/.vite/
 *.local
 
-# Editor directories and files
+# Runtime / process
+*.pid
+*.pid.lock
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code
+.claude/
+
+# Editor
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Proto generated (backend)
+**/generated/
+**/__generated__/
+
+# Coverage & testing
+coverage/
+.nyc_output/
+**/coverage/
+**/.nyc_output/
+
+# Storybook (frontend)
+storybook-static/
+
+# Docker local overrides (backend)
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Kubernetes secrets (backend)
+*-secret.yaml
+secrets/
+
+# Temp
+tmp/
+temp/

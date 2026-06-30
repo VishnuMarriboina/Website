@@ -1,0 +1,352 @@
+syntax = "proto3";
+
+package servicea;
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Service A — Auth, Item (legacy), Admin, Product, Order
+// ──────────────────────────────────────────────────────────────────────────────
+
+service ServiceA {
+  // ── Health ──────────────────────────────────────────────────────────────────
+  rpc HealthCheck       (HealthCheckRequest)     returns (HealthCheckResponse);
+
+  // ── Legacy Item (backward-compatible) ───────────────────────────────────────
+  rpc GetById           (GetByIdRequest)         returns (ItemResponse);
+  rpc GetAll            (GetAllRequest)          returns (GetAllResponse);
+  rpc Create            (CreateItemRequest)      returns (ItemResponse);
+  rpc Update            (UpdateItemRequest)      returns (ItemResponse);
+  rpc Delete            (DeleteItemRequest)      returns (StatusResponse);
+
+  // ── User Auth ────────────────────────────────────────────────────────────────
+  rpc Register          (RegisterRequest)        returns (AuthResponse);
+  rpc Login             (LoginRequest)           returns (AuthResponse);
+
+  // ── Admin Auth ───────────────────────────────────────────────────────────────
+  rpc AdminLogin        (AdminLoginRequest)      returns (AdminAuthResponse);
+
+  // ── Product Management ───────────────────────────────────────────────────────
+  rpc GetProducts       (GetProductsRequest)     returns (GetProductsResponse);
+  rpc GetProductById    (GetByIdRequest)         returns (ProductResponse);
+  rpc CreateProduct     (CreateProductRequest)   returns (ProductResponse);
+  rpc UpdateProduct     (UpdateProductRequest)   returns (ProductResponse);
+  rpc DeleteProduct     (DeleteItemRequest)      returns (StatusResponse);
+  rpc ActivateProduct   (GetByIdRequest)         returns (ProductResponse);
+  rpc DeactivateProduct (GetByIdRequest)         returns (ProductResponse);
+
+  // ── Order Management ─────────────────────────────────────────────────────────
+  rpc CreateOrder       (CreateOrderRequest)     returns (OrderResponse);
+  rpc GetOrderById      (GetByIdRequest)         returns (OrderResponse);
+  rpc GetOrders         (GetOrdersRequest)       returns (GetOrdersResponse);
+  rpc GetUserOrders     (GetUserOrdersRequest)   returns (GetOrdersResponse);
+
+  // ── Cart Management ───────────────────────────────────────────────────────────
+  rpc AddToCart         (AddToCartRequest)        returns (CartResponse);
+  rpc GetCart           (HealthCheckRequest)      returns (CartResponse);
+  rpc UpdateCartItem    (UpdateCartItemRequest)   returns (CartResponse);
+  rpc RemoveFromCart    (RemoveFromCartRequest)   returns (CartResponse);
+  rpc ClearCart         (HealthCheckRequest)      returns (StatusResponse);
+  rpc CheckoutCart      (HealthCheckRequest)      returns (OrderResponse);
+
+  // ── Admin User Management ────────────────────────────────────────────────────
+  rpc GetAllUsers       (GetUsersRequest)          returns (GetUsersResponse);
+
+  // ── Admin Order Status ────────────────────────────────────────────────────────
+  rpc UpdateOrderStatus (UpdateOrderStatusRequest) returns (OrderResponse);
+}
+
+// ── Messages ──────────────────────────────────
+
+message Item {
+  string id          = 1;
+  string name        = 2;
+  string description = 3;
+  string status      = 4;
+  string createdAt   = 5;
+  string updatedAt   = 6;
+}
+
+message GetByIdRequest {
+  string id = 1;
+}
+
+message GetAllRequest {
+  int32  page   = 1;
+  int32  limit  = 2;
+  string status = 3;
+  string search = 4;
+}
+
+message CreateItemRequest {
+  string name        = 1;
+  string description = 2;
+  string status      = 3;
+}
+
+message UpdateItemRequest {
+  string id          = 1;
+  string name        = 2;
+  string description = 3;
+  string status      = 4;
+}
+
+message DeleteItemRequest {
+  string id = 1;
+}
+
+message ItemResponse {
+  bool   success = 1;
+  string message = 2;
+  Item   data    = 3;
+}
+
+message GetAllResponse {
+  bool            success = 1;
+  string          message = 2;
+  repeated Item   data    = 3;
+  PaginationMeta  meta    = 4;
+}
+
+message PaginationMeta {
+  int32 total      = 1;
+  int32 page       = 2;
+  int32 limit      = 3;
+  int32 totalPages = 4;
+  bool  hasNext    = 5;
+  bool  hasPrev    = 6;
+}
+
+message StatusResponse {
+  bool   success = 1;
+  string message = 2;
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  string status    = 1;
+  string service   = 2;
+  string timestamp = 3;
+}
+
+// ── Auth messages ──────────────────────────────
+
+message AuthUser {
+  string id        = 1;
+  string name      = 2;
+  string email     = 3;
+  string role      = 4;
+  string createdAt = 5;
+}
+
+message RegisterRequest {
+  string name     = 1;
+  string email    = 2;
+  string password = 3;
+}
+
+message LoginRequest {
+  string email    = 1;
+  string password = 2;
+}
+
+message AuthResponse {
+  bool     success = 1;
+  string   message = 2;
+  string   token   = 3;
+  AuthUser user    = 4;
+}
+
+// ── Admin Auth messages ──────────────────────────────────────────────────────
+
+message AdminLoginRequest {
+  string email    = 1;
+  string password = 2;
+}
+
+message AdminData {
+  string id        = 1;
+  string name      = 2;
+  string email     = 3;
+  string role      = 4;
+  string createdAt = 5;
+}
+
+message AdminAuthResponse {
+  bool      success = 1;
+  string    message = 2;
+  string    token   = 3;
+  AdminData admin   = 4;
+}
+
+// ── Product messages ─────────────────────────────────────────────────────────
+
+message Product {
+  string id          = 1;
+  string name        = 2;
+  string description = 3;
+  string category    = 4;
+  string image       = 5;
+  double price       = 6;
+  int32  stock       = 7;
+  string status      = 8;
+  string createdAt   = 9;
+  string updatedAt   = 10;
+}
+
+message GetProductsRequest {
+  int32  page     = 1;
+  int32  limit    = 2;
+  string status   = 3;
+  string category = 4;
+  string search   = 5;
+}
+
+message CreateProductRequest {
+  string name        = 1;
+  string description = 2;
+  string category    = 3;
+  string image       = 4;
+  double price       = 5;
+  int32  stock       = 6;
+  string status      = 7;
+}
+
+message UpdateProductRequest {
+  string id          = 1;
+  string name        = 2;
+  string description = 3;
+  string category    = 4;
+  string image       = 5;
+  double price       = 6;
+  int32  stock       = 7;
+  string status      = 8;
+}
+
+message ProductResponse {
+  bool    success = 1;
+  string  message = 2;
+  Product data    = 3;
+}
+
+message GetProductsResponse {
+  bool             success = 1;
+  string           message = 2;
+  repeated Product data    = 3;
+  PaginationMeta   meta    = 4;
+}
+
+// ── Order messages ───────────────────────────────────────────────────────────
+
+message OrderProduct {
+  string productId   = 1;
+  string productName = 2;
+  int32  quantity    = 3;
+  double price       = 4;
+}
+
+message Order {
+  string                id            = 1;
+  string                userId        = 2;
+  repeated OrderProduct products      = 3;
+  double                totalAmount   = 4;
+  string                orderStatus   = 5;
+  string                paymentStatus = 6;
+  string                createdAt     = 7;
+}
+
+message CreateOrderRequest {
+  string userId    = 1;
+  string productId = 2;
+  int32  quantity  = 3;
+}
+
+message OrderResponse {
+  bool   success = 1;
+  string message = 2;
+  Order  data    = 3;
+}
+
+message GetOrdersRequest {
+  int32  page        = 1;
+  int32  limit       = 2;
+  string orderStatus = 3;
+}
+
+message GetUserOrdersRequest {
+  string userId = 1;
+  int32  page   = 2;
+  int32  limit  = 3;
+}
+
+message GetOrdersResponse {
+  bool           success = 1;
+  string         message = 2;
+  repeated Order data    = 3;
+  PaginationMeta meta    = 4;
+}
+
+// ── Cart messages ─────────────────────────────────────────────────────────────
+
+message CartItem {
+  string productId   = 1;
+  string productName = 2;
+  int32  quantity    = 3;
+  double price       = 4;
+}
+
+message Cart {
+  string            id          = 1;
+  string            userId      = 2;
+  repeated CartItem items       = 3;
+  double            totalAmount = 4;
+  string            updatedAt   = 5;
+}
+
+message AddToCartRequest {
+  string productId = 1;
+  int32  quantity  = 2;
+}
+
+message UpdateCartItemRequest {
+  string productId = 1;
+  int32  quantity  = 2;
+}
+
+message RemoveFromCartRequest {
+  string productId = 1;
+}
+
+message CartResponse {
+  bool   success = 1;
+  string message = 2;
+  Cart   data    = 3;
+}
+
+// ── User management messages ─────────────────────────────────────────────────
+
+message GetUsersRequest {
+  int32 page  = 1;
+  int32 limit = 2;
+}
+
+message UserData {
+  string id        = 1;
+  string name      = 2;
+  string email     = 3;
+  string role      = 4;
+  string createdAt = 5;
+}
+
+message GetUsersResponse {
+  bool             success = 1;
+  string           message = 2;
+  repeated UserData data   = 3;
+  PaginationMeta   meta    = 4;
+}
+
+// ── Order status update message ──────────────────────────────────────────────
+
+message UpdateOrderStatusRequest {
+  string id          = 1;
+  string orderStatus = 2;
+}

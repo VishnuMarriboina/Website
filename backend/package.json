@@ -1,0 +1,23 @@
+{
+  "name": "microservices-backend",
+  "version": "1.0.0",
+  "description": "Node.js gRPC microservices backend with gRPC-Web proxy",
+  "private": true,
+  "scripts": {
+    "install:all": "bash scripts/install-all.sh",
+    "start": "concurrently --names proxy,svc-a,svc-b \"npm --prefix grpc-web-proxy start\" \"npm --prefix services/service-a start\" \"npm --prefix services/service-b start\"",
+    "dev":   "concurrently --names proxy,svc-a,svc-b \"npm --prefix grpc-web-proxy run dev\" \"npm --prefix services/service-a run dev\" \"npm --prefix services/service-b run dev\"",
+    "seed":           "npm --prefix services/service-a run seed && npm --prefix services/service-b run seed",
+    "seed:products":  "npm --prefix services/service-a run seed:products",
+    "seed:jobs":      "npm --prefix services/service-b run seed:jobs",
+    "seed:all":       "npm --prefix services/service-a run seed && npm --prefix services/service-b run seed && npm --prefix services/service-a run seed:products && npm --prefix services/service-b run seed:jobs",
+    "docker:up":      "docker-compose up -d",
+    "docker:down":    "docker-compose down",
+    "docker:build":   "docker-compose build --no-cache",
+    "docker:logs":    "docker-compose logs -f",
+    "docker:restart": "docker-compose down && docker-compose up -d"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

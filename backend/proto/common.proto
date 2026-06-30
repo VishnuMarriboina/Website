@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package common;
+
+// Empty message for requests with no body
+message Empty {}
+
+// Generic ID wrapper
+message Id {
+  string id = 1;
+}
+
+// Pagination input
+message Pagination {
+  int32 page  = 1;
+  int32 limit = 2;
+}
+
+// Pagination metadata returned with list responses
+message Meta {
+  int32 total      = 1;
+  int32 page       = 2;
+  int32 limit      = 3;
+  int32 totalPages = 4;
+  bool  hasNext    = 5;
+  bool  hasPrev    = 6;
+}
+
+// Generic boolean status response
+message StatusResponse {
+  bool   success = 1;
+  string message = 2;
+}
+
+// Generic error response
+message ErrorResponse {
+  bool   success    = 1;
+  string message    = 2;
+  string errorCode  = 3;
+  int32  statusCode = 4;
+}
