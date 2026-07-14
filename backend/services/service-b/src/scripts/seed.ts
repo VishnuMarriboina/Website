@@ -9,15 +9,13 @@
  * NOTE: Requires service-a seed to have run first (to get valid userIds).
  */
 
-import mongoose from 'mongoose';
 import path from 'path';
 import dotenv from 'dotenv';
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
-dotenv.config({ path: path.join(__dirname, '../../../../.env') });
-
-import config from '../config';
-import Job from '../models/jobModel';
-import Application from '../models/applicationModel';
+import prisma from '../config/prisma';
+import jobRepository from '../repositories/jobRepository';
+import applicationRepository from '../repositories/applicationRepository';
 
 const JOBS_DATA = [
   {
@@ -127,49 +125,43 @@ const APPLICATIONS_SPEC: [number, number, string][] = [
 ];
 
 async function seed() {
-  await mongoose.connect(config.db.uri);
-  console.log('[seed:service-b] Connected to MongoDB:', config.db.uri);
+  console.log('[seed:service-b] Connecting to MySQL...');
 
-  // ── Clear all collections ────────────────────────────────────────────────────
+  // ── Clear all tables ─────────────────────────────────────────────────────────
   console.log('\n[seed] Clearing existing data...');
-  const [delJobs, delApps] = await Promise.all([
-    Job.deleteMany({}),
-    Application.deleteMany({}),
-  ]);
-  console.log(`  Deleted  ${delJobs.deletedCount} jobs`);
-  console.log(`  Deleted  ${delApps.deletedCount} applications`);
+  await prisma.application.deleteMany({});
+  await prisma.job.deleteMany({});
+  console.log('  Cleared: applications, jobs');
 
   // ── Jobs ─────────────────────────────────────────────────────────────────────
   console.log('\n[seed] Seeding jobs...');
   const insertedJobIds: string[] = [];
   for (const j of JOBS_DATA) {
-    const created = await Job.create(j);
+    const created = await jobRepository.create(j);
     console.log(`  INSERT Job "${j.title}"  [${j.status}]`);
-    insertedJobIds.push((created._id as mongoose.Types.ObjectId).toString());
+    insertedJobIds.push(created.id);
   }
 
   // ── Applications ─────────────────────────────────────────────────────────────
   console.log('\n[seed] Seeding applications...');
 
-  const UserModel = mongoose.model(
-    'User',
-    new mongoose.Schema({ name: String, email: String, passwordHash: String }, { timestamps: true })
-  );
-  const users = await UserModel.find({}).lean().limit(10);
+  // Read users inserted by service-a seed — same MySQL DB, query the users table directly
+  const users = await prisma.$queryRaw<{ id: string }[]>`
+    SELECT id FROM ServCrustProject.users ORDER BY createdAt ASC LIMIT 10
+  `;
 
   if (users.length === 0) {
     console.log('  SKIP  Applications — no users found. Run service-a seed first.');
   } else {
     for (const [userIdx, jobIdx, applicationStatus] of APPLICATIONS_SPEC) {
-      const user   = users[userIdx % users.length];
-      const userId = (user._id as mongoose.Types.ObjectId).toString();
-      const jobId  = insertedJobIds[jobIdx];
+      const user  = users[userIdx % users.length];
+      const jobId = insertedJobIds[jobIdx];
 
-      await Application.create({
-        userId,
+      await applicationRepository.create({
+        userId:            user.id,
         jobId,
         resumeUrl:         `https://cdn.example.com/resumes/user-${userIdx + 1}.pdf`,
-        coverLetter:       `I am excited to apply for this position and believe my skills align well with your requirements.`,
+        coverLetter:       'I am excited to apply for this position and believe my skills align well with your requirements.',
         applicationStatus,
       });
       console.log(`  INSERT Application — user[${userIdx}] → job "${JOBS_DATA[jobIdx].title}"  [${applicationStatus}]`);
@@ -178,18 +170,19 @@ async function seed() {
 
   // ── Summary ──────────────────────────────────────────────────────────────────
   const [jobCount, appCount] = await Promise.all([
-    Job.countDocuments(),
-    Application.countDocuments(),
+    prisma.job.count(),
+    prisma.application.count(),
   ]);
 
   console.log('\n[seed:service-b] Done!');
   console.log(`  Jobs:         ${jobCount}`);
   console.log(`  Applications: ${appCount}`);
 
-  await mongoose.disconnect();
+  await prisma.$disconnect();
 }
 
-seed().catch((err) => {
+seed().catch(async (err) => {
   console.error('[seed:service-b] Error:', err);
+  await prisma.$disconnect();
   process.exit(1);
 });

@@ -9,7 +9,7 @@ const config: ServiceBConfig = Object.freeze({
     host: '0.0.0.0',
   },
   db: {
-    uri: process.env['MONGODB_URI'] || 'mongodb://localhost:27017/myData',
+    url: process.env['DATABASE_URL'] || 'mysql://root:@localhost:3306/servcrust',
   },
   jwt: {
     secret: process.env['JWT_SECRET'] || 'change_this_secret_in_production',

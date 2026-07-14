@@ -9,11 +9,12 @@ const config: ServiceAConfig = Object.freeze({
     host: '0.0.0.0',
   },
   db: {
-    uri: process.env['MONGODB_URI'] || 'mongodb://localhost:27017/myData',
+    url: process.env['DATABASE_URL'] || 'mysql://root:@localhost:3306/servcrust',
   },
   jwt: {
-    secret:    process.env['JWT_SECRET']     || 'change_this_secret_in_production',
-    expiresIn: process.env['JWT_EXPIRES_IN'] || '7d',
+    secret:           process.env['JWT_SECRET']         || 'change_this_secret_in_production',
+    accessExpiresIn:  process.env['JWT_ACCESS_EXPIRY']  || '15m',
+    refreshExpiresIn: process.env['JWT_REFRESH_EXPIRY'] || '7d',
   },
   services: {
     serviceB: {

@@ -4,12 +4,13 @@ export interface GrpcConfig {
 }
 
 export interface DbConfig {
-  uri: string;
+  url: string;
 }
 
 export interface JwtConfig {
-  secret:    string;
-  expiresIn: string;
+  secret:           string;
+  accessExpiresIn:  string;
+  refreshExpiresIn: string;
 }
 
 export interface ServiceEndpoint {

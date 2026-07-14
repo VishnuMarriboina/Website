@@ -1,10 +1,288 @@
 import { useState } from "react";
+import type { CSSProperties } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { FiTrash2, FiPlus, FiMinus, FiShoppingBag, FiArrowLeft } from "react-icons/fi";
 import { useCart, useUpdateCartItem, useRemoveFromCart, useClearCart, useCheckoutCart } from "../hooks/useServiceA";
 import { useAuthStore } from "../store/authStore";
 import type { CartItem } from "../grpc/clients/types";
 import CustomModal from "../components/CustomModal";
+
+// ── Styles ────────────────────────────────────────────────────────────────────
+//
+// Plain properties (color, spacing, layout that never changes) live in this
+// `styles` object and are applied via the `style` prop — the web equivalent of
+// React Native's StyleSheet.create. Rules that need something inline styles
+// can't express — :hover, :disabled, @media breakpoints, sibling selectors,
+// @keyframes — stay in the embedded <style> tag below and are applied via
+// className instead.
+
+const styles: Record<string, CSSProperties> = {
+  page: { minHeight: "100vh", background: "#f8fafc" },
+  container: { maxWidth: "72rem", margin: "0 auto", padding: "2.5rem 1rem" },
+
+  loginGate: {
+    minHeight: "100vh",
+    background: "#fff",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "1rem",
+    padding: "0 1rem",
+  },
+  loginIcon: { color: "#e2e8f0" },
+  loginText: { color: "#64748b", fontWeight: 500 },
+
+  headerRow: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" },
+  title: { fontSize: "1.5rem", fontWeight: 700, color: "#0f172a" },
+  count: { fontSize: "0.875rem", color: "#94a3b8" },
+
+  skeletonRows: { display: "flex", flexDirection: "column", gap: "1rem" },
+  skeletonRow: { display: "flex", gap: "1rem" },
+  skeletonBar: { flex: "1 1 0%", height: "1rem", background: "#f1f5f9", borderRadius: "0.25rem" },
+  skeletonBarNarrow: { width: "5rem", height: "1rem", background: "#f1f5f9", borderRadius: "0.25rem" },
+
+  empty: {
+    background: "#fff",
+    borderRadius: "1rem",
+    border: "1px solid #f1f5f9",
+    padding: "4rem",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "1rem",
+  },
+  emptyIcon: { color: "#e2e8f0" },
+  emptyText: { color: "#64748b", fontWeight: 500 },
+
+  itemsCard: {
+    background: "#fff",
+    borderRadius: "1rem",
+    border: "1px solid #f1f5f9",
+    boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+    overflow: "hidden",
+  },
+  itemsHeader: {
+    display: "grid",
+    gridTemplateColumns: "1fr auto auto auto",
+    gap: "1rem",
+    padding: "0.875rem 1.25rem",
+    background: "#1e293b",
+    color: "#fff",
+    fontSize: "0.75rem",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+    borderRadius: "1rem 1rem 0 0",
+  },
+  itemsHeaderQty: { textAlign: "center", width: "6rem" },
+  itemsHeaderPrice: { textAlign: "right", width: "5rem" },
+  itemsHeaderSpacer: { width: "2rem" },
+
+  itemInfo: { minWidth: 0 },
+  itemName: {
+    fontWeight: 600,
+    color: "#1e293b",
+    fontSize: "0.875rem",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
+  itemUnitPrice: { fontSize: "0.75rem", color: "#94a3b8", marginTop: "0.125rem" },
+  itemQty: { display: "flex", alignItems: "center", gap: "0.5rem", width: "6rem", justifyContent: "center" },
+  qtyValue: { width: "1.5rem", textAlign: "center", fontSize: "0.875rem", fontWeight: 600, color: "#1e293b" },
+  itemTotal: { width: "5rem", textAlign: "right" },
+  itemTotalValue: { fontSize: "0.875rem", fontWeight: 700, color: "#1e293b" },
+  itemRemoveWrap: { width: "2rem", display: "flex", justifyContent: "center" },
+
+  summaryCard: {
+    background: "#fff",
+    borderRadius: "1rem",
+    border: "1px solid #f1f5f9",
+    boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+    padding: "1.25rem",
+  },
+  summaryTitle: { fontWeight: 700, color: "#1e293b", marginBottom: "1rem" },
+  summaryLines: { display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.875rem" },
+  summaryLine: { display: "flex", justifyContent: "space-between", color: "#64748b" },
+  summaryLineValue: { fontWeight: 500, color: "#334155" },
+  summaryFree: { color: "#16a34a", fontWeight: 600 },
+  summaryDivider: {
+    borderTop: "1px solid #f1f5f9",
+    marginTop: "1rem",
+    paddingTop: "1rem",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  summaryTotalLabel: { fontWeight: 700, color: "#0f172a" },
+  summaryTotalValue: { fontSize: "1.25rem", fontWeight: 700, color: "#0f172a" },
+
+  trustCard: {
+    background: "#fff",
+    borderRadius: "1rem",
+    border: "1px solid #f1f5f9",
+    boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+    padding: "1rem",
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.625rem",
+  },
+  trustItem: { display: "flex", alignItems: "center", gap: "0.75rem" },
+  trustIcon: { fontSize: "1.125rem" },
+  trustLabel: { fontSize: "0.75rem", fontWeight: 600, color: "#334155" },
+  trustSub: { fontSize: "11px", color: "#94a3b8" },
+};
+
+// Rules inline style objects can't express: hover/disabled states, the
+// two-column breakpoint, the sibling divider between cart rows, and the
+// skeleton pulse keyframes.
+const CART_STYLES = `
+.cart-login-btn {
+  background: #f97316;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.75rem;
+  transition: background-color 0.15s ease;
+  text-decoration: none;
+}
+.cart-login-btn:hover { background: #ea580c; }
+
+.cart-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #f97316;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+  text-decoration: none;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+.cart-back-link:hover { color: #fff; background: #f97316; border-color: #f97316; }
+
+.cart-browse-btn {
+  background: #f97316;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.75rem;
+  transition: background-color 0.15s ease;
+  text-decoration: none;
+}
+.cart-browse-btn:hover { background: #ea580c; }
+
+.cart-grid,
+.cart-skeleton-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr;
+}
+.cart-grid { align-items: start; }
+
+@media (min-width: 1024px) {
+  .cart-grid,
+  .cart-skeleton-grid {
+    grid-template-columns: 1fr 340px;
+  }
+  .cart-summary-col {
+    position: sticky;
+    top: 1.5rem;
+  }
+}
+
+.cart-summary-col { display: flex; flex-direction: column; gap: 1rem; }
+
+.cart-skeleton-card {
+  background: #fff;
+  border-radius: 1rem;
+  border: 1px solid #f1f5f9;
+  padding: 1.5rem;
+  animation: cart-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+.cart-skeleton-summary {
+  height: 13rem;
+  animation: cart-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes cart-pulse {
+  50% { opacity: 0.5; }
+}
+
+.cart-item-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 1.25rem;
+}
+.cart-items-list > .cart-item-row + .cart-item-row {
+  border-top: 1px solid #f8fafc;
+}
+
+.cart-qty-btn {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.cart-qty-btn:hover { background: #e2e8f0; }
+
+.cart-item-remove-btn {
+  padding: 0.375rem;
+  border-radius: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.cart-item-remove-btn:hover { background: #fef2f2; color: #ef4444; }
+
+.cart-checkout-btn {
+  margin-top: 1.25rem;
+  width: 100%;
+  background: #f97316;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  transition: background-color 0.15s ease;
+}
+.cart-checkout-btn:hover:not(:disabled) { background: #ea580c; }
+.cart-checkout-btn:disabled { background: #fdba74; cursor: not-allowed; }
+
+.cart-clear-btn {
+  margin-top: 0.5rem;
+  width: 100%;
+  background: none;
+  border: none;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.375rem 0;
+  transition: color 0.15s ease;
+}
+.cart-clear-btn:hover:not(:disabled) { color: #ef4444; }
+.cart-clear-btn:disabled { cursor: not-allowed; }
+`;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -26,38 +304,38 @@ function CartItemRow({ item, onUpdate, onRemove }: {
   onRemove: (productId: string) => void;
 }) {
   return (
-    <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 items-center px-5 py-4">
-      <div className="min-w-0">
-        <p className="font-semibold text-slate-800 text-sm truncate">{item.productName}</p>
-        <p className="text-xs text-slate-400 mt-0.5">₹{item.price.toLocaleString("en-IN")} / unit</p>
+    <div className="cart-item-row">
+      <div style={styles.itemInfo}>
+        <p style={styles.itemName}>{item.productName}</p>
+        <p style={styles.itemUnitPrice}>₹{item.price.toLocaleString("en-IN")} / unit</p>
       </div>
 
-      <div className="flex items-center gap-2 w-24 justify-center">
+      <div style={styles.itemQty}>
         <button
           onClick={() => onUpdate(item.productId, item.quantity - 1)}
-          className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors"
+          className="cart-qty-btn"
           aria-label="Decrease quantity"
         >
           <FiMinus size={12} />
         </button>
-        <span className="w-6 text-center text-sm font-semibold text-slate-800">{item.quantity}</span>
+        <span style={styles.qtyValue}>{item.quantity}</span>
         <button
           onClick={() => onUpdate(item.productId, item.quantity + 1)}
-          className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors"
+          className="cart-qty-btn"
           aria-label="Increase quantity"
         >
           <FiPlus size={12} />
         </button>
       </div>
 
-      <div className="w-20 text-right">
-        <p className="text-sm font-bold text-slate-800">₹{(item.price * item.quantity).toLocaleString("en-IN")}</p>
+      <div style={styles.itemTotal}>
+        <p style={styles.itemTotalValue}>₹{(item.price * item.quantity).toLocaleString("en-IN")}</p>
       </div>
 
-      <div className="w-8 flex justify-center">
+      <div style={styles.itemRemoveWrap}>
         <button
           onClick={() => onRemove(item.productId)}
-          className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
+          className="cart-item-remove-btn"
           aria-label="Remove item"
         >
           <FiTrash2 size={15} />
@@ -84,14 +362,16 @@ function Cart() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 px-4">
-        <FiShoppingBag size={48} className="text-slate-200" />
-        <p className="text-slate-500 font-medium">Please log in to view your cart</p>
-        <Link to="/login"
-          className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-colors">
-          Log In
-        </Link>
-      </div>
+      <>
+        <style>{CART_STYLES}</style>
+        <div style={styles.loginGate}>
+          <FiShoppingBag size={48} style={styles.loginIcon} />
+          <p style={styles.loginText}>Please log in to view your cart</p>
+          <Link to="/login" className="cart-login-btn">
+            Log In
+          </Link>
+        </div>
+      </>
     );
   }
 
@@ -146,7 +426,8 @@ function Cart() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div style={styles.page}>
+      <style>{CART_STYLES}</style>
       <CustomModal
         isOpen={modal.isOpen}
         type={modal.type}
@@ -155,61 +436,61 @@ function Cart() {
         onClose={modal.onClose ?? closeModal}
       />
 
-      <div className="max-w-6xl mx-auto px-4 py-10">
+      <div style={styles.container}>
 
         {/* Header row */}
-        <div className="flex items-center justify-between mb-6">
+        <div style={styles.headerRow}>
           <div>
-            <Link to="/products"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-500 hover:text-white bg-orange-50 hover:bg-orange-500 border border-orange-200 hover:border-orange-500 px-3 py-1.5 rounded-lg mb-2 transition-all">
+            <Link to="/products" className="cart-back-link">
               <FiArrowLeft size={13} />
               Continue Shopping
             </Link>
-            <h1 className="text-2xl font-bold text-slate-900">Your Cart</h1>
+            <h1 style={styles.title}>Your Cart</h1>
           </div>
           {items.length > 0 && (
-            <p className="text-sm text-slate-400">{items.length} item{items.length !== 1 ? "s" : ""}</p>
+            <p style={styles.count}>{items.length} item{items.length !== 1 ? "s" : ""}</p>
           )}
         </div>
 
         {isLoading && (
-          <div className="grid lg:grid-cols-[1fr_340px] gap-6">
-            <div className="bg-white rounded-2xl border border-slate-100 p-6 animate-pulse space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex gap-4">
-                  <div className="flex-1 h-4 bg-slate-100 rounded" />
-                  <div className="w-20 h-4 bg-slate-100 rounded" />
-                </div>
-              ))}
+          <div className="cart-skeleton-grid">
+            <div className="cart-skeleton-card">
+              <div style={styles.skeletonRows}>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} style={styles.skeletonRow}>
+                    <div style={styles.skeletonBar} />
+                    <div style={styles.skeletonBarNarrow} />
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="bg-white rounded-2xl border border-slate-100 p-6 animate-pulse h-52" />
+            <div className="cart-skeleton-card cart-skeleton-summary" />
           </div>
         )}
 
         {!isLoading && items.length === 0 && (
-          <div className="bg-white rounded-2xl border border-slate-100 p-16 flex flex-col items-center gap-4">
-            <FiShoppingBag size={44} className="text-slate-200" />
-            <p className="text-slate-500 font-medium">Your cart is empty</p>
-            <Link to="/products"
-              className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-colors">
+          <div style={styles.empty}>
+            <FiShoppingBag size={44} style={styles.emptyIcon} />
+            <p style={styles.emptyText}>Your cart is empty</p>
+            <Link to="/products" className="cart-browse-btn">
               Browse Products
             </Link>
           </div>
         )}
 
         {!isLoading && items.length > 0 && (
-          <div className="grid lg:grid-cols-[1fr_340px] gap-6 items-start">
+          <div className="cart-grid">
 
             {/* ── Left: cart items ─────────────────────────────────────────── */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div style={styles.itemsCard}>
               {/* Column headers */}
-              <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-5 py-3.5 bg-slate-800 text-xs font-bold text-white uppercase tracking-wider rounded-t-2xl">
+              <div style={styles.itemsHeader}>
                 <span>Product</span>
-                <span className="text-center w-24">Qty</span>
-                <span className="text-right w-20">Price</span>
-                <span className="w-8" />
+                <span style={styles.itemsHeaderQty}>Qty</span>
+                <span style={styles.itemsHeaderPrice}>Price</span>
+                <span style={styles.itemsHeaderSpacer} />
               </div>
-              <div className="divide-y divide-slate-50">
+              <div className="cart-items-list">
                 {items.map((item) => (
                   <CartItemRow
                     key={item.productId}
@@ -222,34 +503,34 @@ function Cart() {
             </div>
 
             {/* ── Right: order summary (sticky) ─────────────────────────────── */}
-            <div className="lg:sticky lg:top-6 space-y-4">
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-                <h2 className="font-bold text-slate-800 mb-4">Order Summary</h2>
+            <div className="cart-summary-col">
+              <div style={styles.summaryCard}>
+                <h2 style={styles.summaryTitle}>Order Summary</h2>
 
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between text-slate-500">
+                <div style={styles.summaryLines}>
+                  <div style={styles.summaryLine}>
                     <span>Subtotal ({items.length} item{items.length !== 1 ? "s" : ""})</span>
-                    <span className="font-medium text-slate-700">₹{(cart?.totalAmount ?? 0).toLocaleString("en-IN")}</span>
+                    <span style={styles.summaryLineValue}>₹{(cart?.totalAmount ?? 0).toLocaleString("en-IN")}</span>
                   </div>
-                  <div className="flex justify-between text-slate-500">
+                  <div style={styles.summaryLine}>
                     <span>Delivery</span>
-                    <span className="text-green-600 font-semibold">Free</span>
+                    <span style={styles.summaryFree}>Free</span>
                   </div>
-                  <div className="flex justify-between text-slate-500">
+                  <div style={styles.summaryLine}>
                     <span>Taxes</span>
-                    <span className="text-slate-500">Included</span>
+                    <span>Included</span>
                   </div>
                 </div>
 
-                <div className="border-t border-slate-100 mt-4 pt-4 flex justify-between items-center">
-                  <span className="font-bold text-slate-900">Total</span>
-                  <span className="text-xl font-bold text-slate-900">₹{(cart?.totalAmount ?? 0).toLocaleString("en-IN")}</span>
+                <div style={styles.summaryDivider}>
+                  <span style={styles.summaryTotalLabel}>Total</span>
+                  <span style={styles.summaryTotalValue}>₹{(cart?.totalAmount ?? 0).toLocaleString("en-IN")}</span>
                 </div>
 
                 <button
                   onClick={handleCheckout}
                   disabled={checkoutCart.isPending}
-                  className="mt-5 w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-semibold py-3 rounded-xl transition-colors text-sm shadow-sm"
+                  className="cart-checkout-btn"
                 >
                   {checkoutCart.isPending ? "Placing Order…" : "Place Order →"}
                 </button>
@@ -257,24 +538,24 @@ function Cart() {
                 <button
                   onClick={handleClearCart}
                   disabled={clearCart.isPending}
-                  className="mt-2 w-full text-xs text-slate-400 hover:text-red-500 transition-colors py-1.5"
+                  className="cart-clear-btn"
                 >
                   {clearCart.isPending ? "Clearing…" : "Clear Cart"}
                 </button>
               </div>
 
               {/* Trust badges */}
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 space-y-2.5">
+              <div style={styles.trustCard}>
                 {[
                   { icon: "🚚", label: "Free Delivery", sub: "On all orders" },
                   { icon: "🔒", label: "Secure Checkout", sub: "Your data is safe" },
                   { icon: "📞", label: "Support", sub: "Mon–Sat, 9am–6pm" },
                 ].map(({ icon, label, sub }) => (
-                  <div key={label} className="flex items-center gap-3">
-                    <span className="text-lg">{icon}</span>
+                  <div key={label} style={styles.trustItem}>
+                    <span style={styles.trustIcon}>{icon}</span>
                     <div>
-                      <p className="text-xs font-semibold text-slate-700">{label}</p>
-                      <p className="text-[11px] text-slate-400">{sub}</p>
+                      <p style={styles.trustLabel}>{label}</p>
+                      <p style={styles.trustSub}>{sub}</p>
                     </div>
                   </div>
                 ))}

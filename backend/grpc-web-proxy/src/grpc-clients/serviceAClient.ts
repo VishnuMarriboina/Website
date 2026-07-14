@@ -45,6 +45,8 @@ const client: ServiceAClient = {
   deleteItem:        (r, m)      => call('Delete', r, m),
   register:          (r, m)      => call('Register', r, m),
   login:             (r, m)      => call('Login', r, m),
+  refreshToken:      (r, m)      => call('RefreshToken', r, m),
+  logout:            (r, m)      => call('Logout', r, m),
   // Admin
   adminLogin:        (r, m)      => call('AdminLogin', r, m),
   // Product

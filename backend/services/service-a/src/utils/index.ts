@@ -4,7 +4,7 @@ import { IItem, IProduct, IOrder, ICart } from '../models/types';
 import { GrpcItemDto, GrpcProductDto, GrpcOrderDto, GrpcCartDto } from './types';
 
 export const itemToGrpc = (item: IItem): GrpcItemDto => ({
-  id:          item._id?.toString() ?? item.id ?? '',
+  id:          item.id          ?? '',
   name:        item.name        ?? '',
   description: item.description ?? '',
   status:      item.status      ?? 'active',
@@ -13,7 +13,7 @@ export const itemToGrpc = (item: IItem): GrpcItemDto => ({
 });
 
 export const productToGrpc = (p: IProduct): GrpcProductDto => ({
-  id:          p._id?.toString() ?? p.id ?? '',
+  id:          p.id          ?? '',
   name:        p.name        ?? '',
   description: p.description ?? '',
   category:    p.category    ?? '',
@@ -26,7 +26,7 @@ export const productToGrpc = (p: IProduct): GrpcProductDto => ({
 });
 
 export const cartToGrpc = (c: ICart): GrpcCartDto => ({
-  id:          c._id?.toString() ?? c.id ?? '',
+  id:          c.id          ?? '',
   userId:      c.userId      ?? '',
   items:       (c.items ?? []).map((ci) => ({
     productId:   ci.productId   ?? '',
@@ -39,7 +39,7 @@ export const cartToGrpc = (c: ICart): GrpcCartDto => ({
 });
 
 export const orderToGrpc = (o: IOrder): GrpcOrderDto => ({
-  id:            o._id?.toString() ?? o.id ?? '',
+  id:            o.id            ?? '',
   userId:        o.userId        ?? '',
   products:      (o.products ?? []).map((op) => ({
     productId:   op.productId   ?? '',

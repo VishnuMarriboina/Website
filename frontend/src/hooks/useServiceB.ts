@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import serviceBClient from '../grpc/clients/serviceBClient';
+import { useAuthStore } from '../store/authStore';
 import type {
   GetAllRecordsParams,
   CreateRecordRequest,
@@ -155,19 +156,22 @@ export function useDeactivateJob() {
 // ── Application Queries ───────────────────────────────────────────────────────
 
 export function useApplications(params?: GetApplicationsParams) {
+  const token = useAuthStore((s) => s.token);
   return useQuery({
     queryKey: serviceBKeys.applicationList(params),
     queryFn:  () => serviceBClient.getApplications(params ?? {}),
+    enabled:  !!token,
     staleTime: 30_000,
     gcTime:    5 * 60_000,
   });
 }
 
 export function useUserApplications(userId: string) {
+  const token = useAuthStore((s) => s.token);
   return useQuery({
     queryKey: serviceBKeys.userApplications(userId),
     queryFn:  () => serviceBClient.getUserApplications(userId),
-    enabled:  !!userId,
+    enabled:  !!token && !!userId,
     staleTime: 30_000,
     gcTime:    5 * 60_000,
   });

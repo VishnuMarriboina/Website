@@ -1,38 +1,35 @@
-import { Types } from 'mongoose';
+'use strict';
 
 export interface IItem {
-  _id?:        Types.ObjectId;
+  id:          string;
   name:        string;
   description: string;
   status:      string;
   createdAt?:  Date;
   updatedAt?:  Date;
-  id?:         string;
 }
 
 export interface IUser {
-  _id?:         Types.ObjectId;
+  id:           string;
   name:         string;
   email:        string;
   passwordHash: string;
   createdAt?:   Date;
   updatedAt?:   Date;
-  id?:          string;
 }
 
 export interface IAdmin {
-  _id?:         Types.ObjectId;
+  id:           string;
   name:         string;
   email:        string;
   passwordHash: string;
   role:         string;
   createdAt?:   Date;
   updatedAt?:   Date;
-  id?:          string;
 }
 
 export interface IProduct {
-  _id?:        Types.ObjectId;
+  id:          string;
   name:        string;
   description: string;
   category:    string;
@@ -42,7 +39,6 @@ export interface IProduct {
   status:      string;
   createdAt?:  Date;
   updatedAt?:  Date;
-  id?:         string;
 }
 
 export interface IOrderProduct {
@@ -53,7 +49,7 @@ export interface IOrderProduct {
 }
 
 export interface IOrder {
-  _id?:          Types.ObjectId;
+  id:            string;
   userId:        string;
   products:      IOrderProduct[];
   totalAmount:   number;
@@ -61,7 +57,6 @@ export interface IOrder {
   paymentStatus: string;
   createdAt?:    Date;
   updatedAt?:    Date;
-  id?:           string;
 }
 
 export interface ICartItem {
@@ -72,11 +67,10 @@ export interface ICartItem {
 }
 
 export interface ICart {
-  _id?:        Types.ObjectId;
+  id:          string;
   userId:      string;
   items:       ICartItem[];
   totalAmount: number;
   createdAt?:  Date;
   updatedAt?:  Date;
-  id?:         string;
 }

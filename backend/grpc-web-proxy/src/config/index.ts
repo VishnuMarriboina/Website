@@ -8,6 +8,10 @@ const config: ProxyConfig = Object.freeze({
   cors: {
     origin: process.env['CORS_ORIGIN'] || '*',
   },
+  rateLimit: {
+    windowMs: parseInt(process.env['RATE_LIMIT_WINDOW_MS'] ?? '') || 900_000,
+    max:      parseInt(process.env['RATE_LIMIT_MAX']        ?? '') || 20,
+  },
   services: {
     serviceA: {
       host: process.env['SERVICE_A_GRPC_HOST'] || 'localhost',

@@ -1,7 +1,7 @@
 import { FiMail, FiShield, FiCalendar, FiHash, FiUser, FiLogOut } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { useProducts, useAllOrders, useAllUsers } from '../../hooks/useServiceA';
+import { useProducts, useAllOrders, useAllUsers, useLogout } from '../../hooks/useServiceA';
 
 function getInitials(name: string) {
   return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
@@ -35,7 +35,7 @@ function DetailRow({ icon: Icon, label, value }: DetailRowProps) {
 export default function AdminProfile() {
   const navigate   = useNavigate();
   const user       = useAuthStore((s) => s.user);
-  const logout     = useAuthStore((s) => s.logout);
+  const logout     = useLogout();
 
   const { data: productsData } = useProducts({ limit: 1 });
   const { data: ordersData }   = useAllOrders({ limit: 1 });

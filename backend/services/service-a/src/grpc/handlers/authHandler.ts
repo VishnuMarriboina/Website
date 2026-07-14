@@ -2,7 +2,7 @@
 
 import * as grpc from '@grpc/grpc-js';
 import * as authService from '../../services/authService';
-import { UnaryCall, UnaryCb, GrpcError, RegisterReq, LoginReq } from './types';
+import { UnaryCall, UnaryCb, GrpcError, RegisterReq, LoginReq, RefreshTokenReq, LogoutReq } from './types';
 
 const mapError = (err: { statusCode?: number; message: string }): GrpcError => {
   const statusMap: Record<number, number> = {
@@ -57,6 +57,36 @@ export const Login = async (
       email:    email.trim().toLowerCase(),
       password,
     });
+    callback(null, result as unknown as Record<string, unknown>);
+  } catch (err) {
+    callback(mapError(err as { statusCode?: number; message: string }) as grpc.ServiceError);
+  }
+};
+
+export const RefreshToken = async (
+  call: UnaryCall<RefreshTokenReq>,
+  callback: UnaryCb
+): Promise<void> => {
+  const { refreshToken } = call.request;
+  if (!refreshToken?.trim()) return callback(invalidArg('refreshToken is required') as grpc.ServiceError);
+
+  try {
+    const result = await authService.refreshToken(refreshToken);
+    callback(null, result as unknown as Record<string, unknown>);
+  } catch (err) {
+    callback(mapError(err as { statusCode?: number; message: string }) as grpc.ServiceError);
+  }
+};
+
+export const Logout = async (
+  call: UnaryCall<LogoutReq>,
+  callback: UnaryCb
+): Promise<void> => {
+  const { refreshToken } = call.request;
+  if (!refreshToken?.trim()) return callback(invalidArg('refreshToken is required') as grpc.ServiceError);
+
+  try {
+    const result = await authService.logout(refreshToken);
     callback(null, result as unknown as Record<string, unknown>);
   } catch (err) {
     callback(mapError(err as { statusCode?: number; message: string }) as grpc.ServiceError);

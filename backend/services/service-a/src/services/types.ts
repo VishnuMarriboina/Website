@@ -40,10 +40,16 @@ export interface UserDto {
 }
 
 export interface AuthResult {
+  success:      boolean;
+  message:      string;
+  token:        string;
+  user:         UserDto;
+  refreshToken: string;
+}
+
+export interface LogoutResult {
   success: boolean;
   message: string;
-  token:   string;
-  user:    UserDto;
 }
 
 // ── Admin ──────────────────────────────────────────────────────────────────────

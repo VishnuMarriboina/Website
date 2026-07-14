@@ -7,19 +7,17 @@
  * Run: npm run seed  (from backend/services/service-a)
  */
 
-import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
 import path from 'path';
 import dotenv from 'dotenv';
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
-dotenv.config({ path: path.join(__dirname, '../../../../.env') });
-
-import config from '../config';
-import Admin from '../models/adminModel';
-import User from '../models/userModel';
-import Product from '../models/productModel';
-import Order from '../models/orderModel';
-import Cart from '../models/cartModel';
+import bcrypt from 'bcryptjs';
+import prisma from '../config/prisma';
+import * as adminRepository from '../repositories/adminRepository';
+import * as userRepository from '../repositories/userRepository';
+import productRepository from '../repositories/productRepository';
+import orderRepository from '../repositories/orderRepository';
+import cartRepository from '../repositories/cartRepository';
 
 const SALT_ROUNDS = 10;
 
@@ -29,16 +27,16 @@ const ADMIN_DATA = [
 ];
 
 const USERS_DATA = [
-  { name: 'Priya Mehta',   email: 'priya.mehta@gmail.com',   password: 'User@123' },
-  { name: 'Rahul Verma',   email: 'rahul.verma@gmail.com',   password: 'User@456' },
-  { name: 'Ananya K',      email: 'ananya.k@gmail.com',      password: 'User@789' },
-  { name: 'Karthik Nair',  email: 'karthik.nair@gmail.com',  password: 'User@1234' },
-  { name: 'Divya Pillai',  email: 'divya.pillai@gmail.com',  password: 'User@1234' },
-  { name: 'Suresh Iyer',   email: 'suresh.iyer@gmail.com',   password: 'User@1234' },
-  { name: 'Meera Joshi',   email: 'meera.joshi@gmail.com',   password: 'User@1234' },
-  { name: 'Vikram Singh',  email: 'vikram.singh@gmail.com',  password: 'User@1234' },
-  { name: 'Lakshmi Rao',   email: 'lakshmi.rao@gmail.com',   password: 'User@1234' },
-  { name: 'Aditya Kumar',  email: 'aditya.kumar@gmail.com',  password: 'User@1234' },
+  { name: 'Priya Mehta',  email: 'priya.mehta@gmail.com',  password: 'User@123'  },
+  { name: 'Rahul Verma',  email: 'rahul.verma@gmail.com',  password: 'User@456'  },
+  { name: 'Ananya K',     email: 'ananya.k@gmail.com',     password: 'User@789'  },
+  { name: 'Karthik Nair', email: 'karthik.nair@gmail.com', password: 'User@1234' },
+  { name: 'Divya Pillai', email: 'divya.pillai@gmail.com', password: 'User@1234' },
+  { name: 'Suresh Iyer',  email: 'suresh.iyer@gmail.com',  password: 'User@1234' },
+  { name: 'Meera Joshi',  email: 'meera.joshi@gmail.com',  password: 'User@1234' },
+  { name: 'Vikram Singh', email: 'vikram.singh@gmail.com', password: 'User@1234' },
+  { name: 'Lakshmi Rao',  email: 'lakshmi.rao@gmail.com',  password: 'User@1234' },
+  { name: 'Aditya Kumar', email: 'aditya.kumar@gmail.com', password: 'User@1234' },
 ];
 
 const PRODUCTS_DATA = [
@@ -64,32 +62,30 @@ const PRODUCTS_DATA = [
   { name: 'Pea Gravel',                 description: 'Small rounded stones ideal for decorative landscaping and drainage.',        category: 'Aggregates', image: '', price: 1050, stock: 700,  status: 'active' },
 ];
 
-// Orders: 20 orders spread across users, with varied statuses and multi-product lines
 // [userIndex, [[productIndex, qty], ...], orderStatus, paymentStatus]
 const ORDERS_SPEC: [number, [number, number][], string, string][] = [
-  [0, [[2, 5], [5, 3]],        'delivered',  'paid'],
-  [0, [[8, 2]],                'cancelled',  'refunded'],
-  [1, [[0, 1], [7, 4]],        'shipped',    'paid'],
-  [1, [[3, 6]],                'confirmed',  'paid'],
-  [2, [[9, 2], [11, 3]],       'delivered',  'paid'],
-  [2, [[17, 1]],               'pending',    'pending'],
-  [3, [[4, 10], [6, 5]],       'confirmed',  'paid'],
-  [3, [[12, 3], [13, 2]],      'shipped',    'paid'],
-  [4, [[1, 4]],                'delivered',  'paid'],
-  [4, [[18, 1], [19, 2]],      'pending',    'pending'],
-  [5, [[10, 1]],               'cancelled',  'failed'],
-  [5, [[2, 8], [3, 4]],        'delivered',  'paid'],
-  [6, [[16, 3], [15, 6]],      'confirmed',  'paid'],
-  [6, [[5, 5]],                'shipped',    'paid'],
-  [7, [[0, 2], [7, 3], [8, 1]],'delivered',  'paid'],
-  [7, [[14, 7]],               'pending',    'pending'],
-  [8, [[6, 10]],               'confirmed',  'paid'],
-  [8, [[17, 2], [18, 1]],      'shipped',    'paid'],
-  [9, [[9, 4], [11, 2]],       'delivered',  'paid'],
-  [9, [[19, 1]],               'cancelled',  'refunded'],
+  [0, [[2, 5], [5, 3]],         'delivered', 'paid'],
+  [0, [[8, 2]],                 'cancelled', 'refunded'],
+  [1, [[0, 1], [7, 4]],         'shipped',   'paid'],
+  [1, [[3, 6]],                 'confirmed', 'paid'],
+  [2, [[9, 2], [11, 3]],        'delivered', 'paid'],
+  [2, [[17, 1]],                'pending',   'pending'],
+  [3, [[4, 10], [6, 5]],        'confirmed', 'paid'],
+  [3, [[12, 3], [13, 2]],       'shipped',   'paid'],
+  [4, [[1, 4]],                 'delivered', 'paid'],
+  [4, [[18, 1], [19, 2]],       'pending',   'pending'],
+  [5, [[10, 1]],                'cancelled', 'failed'],
+  [5, [[2, 8], [3, 4]],         'delivered', 'paid'],
+  [6, [[16, 3], [15, 6]],       'confirmed', 'paid'],
+  [6, [[5, 5]],                 'shipped',   'paid'],
+  [7, [[0, 2], [7, 3], [8, 1]], 'delivered', 'paid'],
+  [7, [[14, 7]],                'pending',   'pending'],
+  [8, [[6, 10]],                'confirmed', 'paid'],
+  [8, [[17, 2], [18, 1]],       'shipped',   'paid'],
+  [9, [[9, 4], [11, 2]],        'delivered', 'paid'],
+  [9, [[19, 1]],                'cancelled', 'refunded'],
 ];
 
-// Carts: 6 of the 10 users have active carts
 // [userIndex, [[productIndex, qty], ...]]
 const CARTS_SPEC: [number, [number, number][]][] = [
   [0, [[2, 2], [5, 1]]],
@@ -101,29 +97,24 @@ const CARTS_SPEC: [number, [number, number][]][] = [
 ];
 
 async function seed() {
-  await mongoose.connect(config.db.uri);
-  console.log('[seed:service-a] Connected to MongoDB:', config.db.uri);
+  console.log('[seed:service-a] Connecting to MySQL...');
 
-  // ── Clear all collections ────────────────────────────────────────────────────
+  // ── Clear all tables ─────────────────────────────────────────────────────────
   console.log('\n[seed] Clearing existing data...');
-  const [delAdmins, delUsers, delProducts, delOrders, delCarts] = await Promise.all([
-    Admin.deleteMany({}),
-    User.deleteMany({}),
-    Product.deleteMany({}),
-    Order.deleteMany({}),
-    Cart.deleteMany({}),
-  ]);
-  console.log(`  Deleted  ${delAdmins.deletedCount} admins`);
-  console.log(`  Deleted  ${delUsers.deletedCount} users`);
-  console.log(`  Deleted  ${delProducts.deletedCount} products`);
-  console.log(`  Deleted  ${delOrders.deletedCount} orders`);
-  console.log(`  Deleted  ${delCarts.deletedCount} carts`);
+  await prisma.cartItem.deleteMany({});
+  await prisma.cart.deleteMany({});
+  await prisma.orderItem.deleteMany({});
+  await prisma.order.deleteMany({});
+  await prisma.product.deleteMany({});
+  await prisma.user.deleteMany({});
+  await prisma.admin.deleteMany({});
+  console.log('  Cleared: cartItems, carts, orderItems, orders, products, users, admins');
 
   // ── Admins ───────────────────────────────────────────────────────────────────
   console.log('\n[seed] Seeding admins...');
   for (const a of ADMIN_DATA) {
     const passwordHash = await bcrypt.hash(a.password, SALT_ROUNDS);
-    await Admin.create({ name: a.name, email: a.email, passwordHash, role: 'ADMIN' });
+    await adminRepository.create({ name: a.name, email: a.email, passwordHash });
     console.log(`  INSERT Admin "${a.email}"  password: ${a.password}`);
   }
 
@@ -132,24 +123,24 @@ async function seed() {
   const insertedUserIds: string[] = [];
   for (const u of USERS_DATA) {
     const passwordHash = await bcrypt.hash(u.password, SALT_ROUNDS);
-    const created = await User.create({ name: u.name, email: u.email, passwordHash });
+    const created = await userRepository.create({ name: u.name, email: u.email, passwordHash });
     console.log(`  INSERT User "${u.email}"  password: ${u.password}`);
-    insertedUserIds.push((created._id as mongoose.Types.ObjectId).toString());
+    insertedUserIds.push(created.id);
   }
 
   // ── Products ─────────────────────────────────────────────────────────────────
   console.log('\n[seed] Seeding products...');
   const insertedProducts: { id: string; name: string; price: number }[] = [];
   for (const p of PRODUCTS_DATA) {
-    const created = await Product.create(p);
+    const created = await productRepository.create(p);
     console.log(`  INSERT Product "${p.name}"  ₹${p.price}`);
-    insertedProducts.push({ id: (created._id as mongoose.Types.ObjectId).toString(), name: p.name, price: p.price });
+    insertedProducts.push({ id: created.id, name: p.name, price: p.price });
   }
 
   // ── Orders ───────────────────────────────────────────────────────────────────
   console.log('\n[seed] Seeding orders...');
   for (const [userIdx, lines, orderStatus, paymentStatus] of ORDERS_SPEC) {
-    const userId = insertedUserIds[userIdx];
+    const userId  = insertedUserIds[userIdx];
     const products = lines.map(([prodIdx, qty]) => ({
       productId:   insertedProducts[prodIdx].id,
       productName: insertedProducts[prodIdx].name,
@@ -157,7 +148,7 @@ async function seed() {
       price:       insertedProducts[prodIdx].price,
     }));
     const totalAmount = products.reduce((sum, p) => sum + p.price * p.quantity, 0);
-    await Order.create({ userId, products, totalAmount, orderStatus, paymentStatus });
+    await orderRepository.create({ userId, totalAmount, orderStatus, paymentStatus, products });
     const label = products.map(p => `${p.productName} ×${p.quantity}`).join(', ');
     console.log(`  INSERT Order — user[${userIdx}] [${orderStatus}/${paymentStatus}] — ${label} — ₹${totalAmount.toLocaleString()}`);
   }
@@ -166,25 +157,25 @@ async function seed() {
   console.log('\n[seed] Seeding carts...');
   for (const [userIdx, lines] of CARTS_SPEC) {
     const userId = insertedUserIds[userIdx];
-    const items = lines.map(([prodIdx, qty]) => ({
-      productId:   insertedProducts[prodIdx].id,
-      productName: insertedProducts[prodIdx].name,
-      quantity:    qty,
-      price:       insertedProducts[prodIdx].price,
-    }));
-    const totalAmount = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    await Cart.create({ userId, items, totalAmount });
-    const label = items.map(i => `${i.productName} ×${i.quantity}`).join(', ');
-    console.log(`  INSERT Cart  — user[${userIdx}] — ${label} — ₹${totalAmount.toLocaleString()}`);
+    for (const [prodIdx, qty] of lines) {
+      await cartRepository.upsertItem(userId, {
+        productId:   insertedProducts[prodIdx].id,
+        productName: insertedProducts[prodIdx].name,
+        quantity:    qty,
+        price:       insertedProducts[prodIdx].price,
+      });
+    }
+    const label = lines.map(([prodIdx, qty]) => `${insertedProducts[prodIdx].name} ×${qty}`).join(', ');
+    console.log(`  INSERT Cart  — user[${userIdx}] — ${label}`);
   }
 
   // ── Summary ──────────────────────────────────────────────────────────────────
   const [adminCount, userCount, productCount, orderCount, cartCount] = await Promise.all([
-    Admin.countDocuments(),
-    User.countDocuments(),
-    Product.countDocuments(),
-    Order.countDocuments(),
-    Cart.countDocuments(),
+    prisma.admin.count(),
+    prisma.user.count(),
+    prisma.product.count(),
+    prisma.order.count(),
+    prisma.cart.count(),
   ]);
 
   console.log('\n[seed:service-a] Done!');
@@ -194,10 +185,11 @@ async function seed() {
   console.log(`  Orders:   ${orderCount}`);
   console.log(`  Carts:    ${cartCount}`);
 
-  await mongoose.disconnect();
+  await prisma.$disconnect();
 }
 
-seed().catch((err) => {
+seed().catch(async (err) => {
   console.error('[seed:service-a] Error:', err);
+  await prisma.$disconnect();
   process.exit(1);
 });

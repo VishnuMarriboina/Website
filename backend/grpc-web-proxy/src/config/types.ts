@@ -3,11 +3,17 @@ export interface ServiceEndpoint {
   port: number;
 }
 
+export interface RateLimitConfig {
+  windowMs: number;
+  max:      number;
+}
+
 export interface ProxyConfig {
-  env:      string;
-  port:     number;
-  cors:     { origin: string };
-  services: {
+  env:       string;
+  port:      number;
+  cors:      { origin: string };
+  rateLimit: RateLimitConfig;
+  services:  {
     serviceA: ServiceEndpoint;
     serviceB: ServiceEndpoint;
   };

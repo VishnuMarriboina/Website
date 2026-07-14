@@ -3,10 +3,20 @@
 import path from 'path';
 import dotenv from 'dotenv';
 
-dotenv.config({ path: path.join(__dirname, '../../../.env') });
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 import { connectDB, disconnectDB } from './config/database';
 import { startGrpcServer } from './grpc/server';
+
+process.on('uncaughtException', (err: Error) => {
+  console.error('[service-b] Uncaught exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason: unknown) => {
+  console.error('[service-b] Unhandled rejection:', reason);
+  process.exit(1);
+});
 
 const bootstrap = async (): Promise<void> => {
   await connectDB();

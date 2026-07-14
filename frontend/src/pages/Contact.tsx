@@ -1,8 +1,173 @@
 import { useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { FaMapMarkerAlt, FaEnvelope, FaPhoneAlt } from 'react-icons/fa';
 import { useCreateRecord } from '../hooks/useServiceB';
 import type { ContactFormState } from './types';
+
+// ── Styles ────────────────────────────────────────────────────────────────────
+//
+// Static properties live in `styles` (applied via the `style` prop); rules
+// that need :hover, :focus, :disabled, or a responsive breakpoint stay in
+// CONTACT_STYLES and are applied via className.
+
+const styles: Record<string, CSSProperties> = {
+  page: { background: '#fff', minHeight: '100vh' },
+
+  header: { background: '#0f172a', padding: '2.5rem 0' },
+  headerInner: { maxWidth: '72rem', margin: '0 auto', padding: '0 1rem', textAlign: 'center' },
+  eyebrow: { fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', color: '#fb923c', textTransform: 'uppercase' },
+  headerSubtitle: {
+    color: '#94a3b8',
+    fontSize: '0.875rem',
+    marginTop: '0.75rem',
+    maxWidth: '36rem',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+  },
+
+  mainWrap: { maxWidth: '64rem', margin: '0 auto', padding: '3rem 1rem' },
+
+  infoCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textAlign: 'center',
+    background: '#f8fafc',
+    border: '1px solid #f1f5f9',
+    borderRadius: '1rem',
+    padding: '1.5rem',
+  },
+  infoIconWrap: {
+    width: '3rem',
+    height: '3rem',
+    background: '#f97316',
+    color: '#fff',
+    borderRadius: '9999px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '0.75rem',
+  },
+  infoLabel: { fontWeight: 600, color: '#1e293b', fontSize: '0.875rem', marginBottom: '0.25rem' },
+  infoLine: { color: '#64748b', fontSize: '0.75rem' },
+
+  formCard: {
+    maxWidth: '42rem',
+    margin: '0 auto',
+    background: '#fff',
+    borderRadius: '1rem',
+    boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+    border: '1px solid #f1f5f9',
+    padding: '2rem',
+  },
+  formTitle: { fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.25rem' },
+  formSubtitle: { fontSize: '0.75rem', color: '#94a3b8', marginBottom: '1.5rem' },
+
+  successBox: { background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '0.75rem', padding: '1.5rem', textAlign: 'center' },
+  successTitle: { fontSize: '1.125rem', fontWeight: 600, color: '#15803d' },
+  successText: { color: '#16a34a', fontSize: '0.875rem', marginTop: '0.25rem' },
+
+  label: { display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#334155', marginBottom: '0.375rem' },
+
+  errorBox: { background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.5rem', padding: '0.75rem 1rem', color: '#dc2626', fontSize: '0.75rem' },
+
+  ctaSection: { background: '#0f172a', padding: '3rem 0' },
+  ctaInner: { maxWidth: '42rem', margin: '0 auto', padding: '0 1rem', textAlign: 'center' },
+  ctaSubtitle: { color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.5rem' },
+};
+
+const CONTACT_STYLES = `
+.contact-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 0.5rem;
+}
+@media (min-width: 768px) {
+  .contact-title { font-size: 1.875rem; }
+}
+
+.contact-info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+@media (min-width: 640px) {
+  .contact-info-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.contact-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.contact-input {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.contact-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #fb923c;
+}
+
+.contact-success-btn {
+  margin-top: 1rem;
+  background: #0f172a;
+  color: #fff;
+  font-size: 0.875rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.contact-success-btn:hover { background: #334155; }
+
+.contact-submit-btn {
+  width: 100%;
+  background: #f97316;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.625rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+.contact-submit-btn:hover:not(:disabled) { background: #ea580c; }
+.contact-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.contact-cta-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+@media (min-width: 768px) {
+  .contact-cta-title { font-size: 1.5rem; }
+}
+
+.contact-cta-btn {
+  display: inline-block;
+  margin-top: 1.25rem;
+  background: #f97316;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+.contact-cta-btn:hover { background: #ea580c; }
+`;
 
 function Contact() {
   const [form, setForm]           = useState<ContactFormState>({ name: '', email: '', message: '' });
@@ -28,23 +193,24 @@ function Contact() {
   };
 
   return (
-    <div className="bg-white min-h-screen">
+    <div style={styles.page}>
+      <style>{CONTACT_STYLES}</style>
 
       {/* Page header */}
-      <div className="bg-slate-900 py-10">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <span className="text-xs font-bold tracking-widest text-orange-400 uppercase">Get in Touch</span>
-          <h1 className="text-2xl md:text-3xl font-bold text-white mt-2">Contact Us</h1>
-          <p className="text-slate-400 text-sm mt-3 max-w-xl mx-auto">
+      <div style={styles.header}>
+        <div style={styles.headerInner}>
+          <span style={styles.eyebrow}>Get in Touch</span>
+          <h1 className="contact-title">Contact Us</h1>
+          <p style={styles.headerSubtitle}>
             We align leaders around a shared purpose and strategic story that catalyses their business and brand to take action.
           </p>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-12">
+      <div style={styles.mainWrap}>
 
         {/* Info cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
+        <div className="contact-info-grid">
           {[
             {
               icon:  <FaMapMarkerAlt size={20} />,
@@ -62,63 +228,64 @@ function Contact() {
               lines: ['+91 88 11 88 1111', '+1 (234) 987-654'],
             },
           ].map(({ icon, label, lines }) => (
-            <div key={label} className="flex flex-col items-center text-center bg-slate-50 border border-slate-100 rounded-2xl p-6">
-              <span className="w-12 h-12 bg-orange-500 text-white rounded-full flex items-center justify-center mb-3">
+            <div key={label} style={styles.infoCard}>
+              <span style={styles.infoIconWrap}>
                 {icon}
               </span>
-              <h3 className="font-semibold text-slate-800 text-sm mb-1">{label}</h3>
+              <h3 style={styles.infoLabel}>{label}</h3>
               {lines.map((line) => (
-                <p key={line} className="text-slate-500 text-xs">{line}</p>
+                <p key={line} style={styles.infoLine}>{line}</p>
               ))}
             </div>
           ))}
         </div>
 
         {/* Contact form */}
-        <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-1">Send an Inquiry</h2>
-          <p className="text-xs text-slate-400 mb-6">We'll get back to you within 24 hours.</p>
+        <div style={styles.formCard}>
+          <h2 style={styles.formTitle}>Send an Inquiry</h2>
+          <p style={styles.formSubtitle}>We'll get back to you within 24 hours.</p>
 
           {submitted ? (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
-              <p className="text-lg font-semibold text-green-700">Inquiry sent!</p>
-              <p className="text-green-600 text-sm mt-1">Our team will reach out to you shortly.</p>
+            <div style={styles.successBox}>
+              <p style={styles.successTitle}>Inquiry sent!</p>
+              <p style={styles.successText}>Our team will reach out to you shortly.</p>
               <button
-                className="mt-4 bg-slate-900 text-white text-sm px-5 py-2 rounded-lg hover:bg-slate-700 transition-colors"
+                className="contact-success-btn"
                 onClick={() => setSubmitted(false)}
               >
                 Send another
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="contact-fields">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Your Name</label>
+                <label style={styles.label}>Your Name</label>
                 <input
                   type="text" name="name" value={form.name} onChange={handleChange} required
                   placeholder="e.g. Ravi Kumar"
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+                  className="contact-input"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Email Address</label>
+                <label style={styles.label}>Email Address</label>
                 <input
                   type="email" name="email" value={form.email} onChange={handleChange} required
                   placeholder="you@example.com"
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+                  className="contact-input"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Message</label>
+                <label style={styles.label}>Message</label>
                 <textarea
                   name="message" value={form.message} onChange={handleChange} required rows={4}
                   placeholder="Tell us about your requirement…"
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 transition resize-none"
+                  className="contact-input"
+                  style={{ resize: 'none' }}
                 />
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-red-600 text-xs">
+                <div style={styles.errorBox}>
                   {error instanceof Error
                     ? error.message
                     : (error as { message?: string })?.message ?? 'Failed to send inquiry. Please try again.'}
@@ -127,7 +294,7 @@ function Contact() {
 
               <button
                 type="submit" disabled={isLoading}
-                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors"
+                className="contact-submit-btn"
               >
                 {isLoading ? 'Sending…' : 'Send Inquiry'}
               </button>
@@ -137,15 +304,13 @@ function Contact() {
       </div>
 
       {/* CTA banner */}
-      <div className="bg-slate-900 py-12">
-        <div className="max-w-2xl mx-auto px-4 text-center">
-          <h2 className="text-xl md:text-2xl font-bold text-white">Join us and be part of a better tomorrow</h2>
-          <p className="text-slate-400 text-sm mt-2">
+      <div style={styles.ctaSection}>
+        <div style={styles.ctaInner}>
+          <h2 className="contact-cta-title">Join us and be part of a better tomorrow</h2>
+          <p style={styles.ctaSubtitle}>
             We are here to support — offering a wide network of ServCrust services with expert knowledge.
           </p>
-          <Link to="/services"
-            className="inline-block mt-5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors"
-          >
+          <Link to="/services" className="contact-cta-btn">
             See Open Roles
           </Link>
         </div>

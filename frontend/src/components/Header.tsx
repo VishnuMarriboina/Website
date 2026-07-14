@@ -6,7 +6,7 @@ import Lottie from 'react-lottie';
 import type { Options } from 'react-lottie';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { useCart } from '../hooks/useServiceA';
+import { useCart, useLogout } from '../hooks/useServiceA';
 import logo from '../assets/logo.json';
 
 interface NavLink {
@@ -62,7 +62,7 @@ function formatDate(iso: string): string {
 function ProfileDropdown({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate();
   const user     = useAuthStore((s) => s.user);
-  const logout   = useAuthStore((s) => s.logout);
+  const logout   = useLogout();
 
   const handleLogout = () => {
     logout();
@@ -215,7 +215,7 @@ function Header() {
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user            = useAuthStore((s) => s.user);
-  const logout          = useAuthStore((s) => s.logout);
+  const logout          = useLogout();
   const navigate        = useNavigate();
 
   const lottieOptions: Options = {

@@ -1,46 +1,55 @@
 'use strict';
 
-import Item from '../models/itemModel';
+import prisma from '../config/prisma';
 import { IItem } from '../models/types';
 import { FindAllOptions, FindAllResult } from './types';
 
 class ItemRepository {
   async findAll(opts: FindAllOptions<Record<string, unknown>> = {}): Promise<FindAllResult<IItem>> {
-    const { filter = {}, page = 1, limit = 10, sort = { createdAt: -1 } } = opts;
+    const { filter = {}, page = 1, limit = 10 } = opts;
     const skip = (page - 1) * limit;
+    const where = buildWhere(filter);
     const [data, total] = await Promise.all([
-      Item.find(filter).sort(sort as Record<string, 1 | -1>).skip(skip).limit(limit).lean() as Promise<IItem[]>,
-      Item.countDocuments(filter),
+      prisma.item.findMany({ where, skip, take: limit, orderBy: { createdAt: 'desc' } }) as Promise<IItem[]>,
+      prisma.item.count({ where }),
     ]);
     return { data, total };
   }
 
   async findById(id: string): Promise<IItem | null> {
-    return Item.findById(id).lean() as Promise<IItem | null>;
+    return prisma.item.findUnique({ where: { id } }) as Promise<IItem | null>;
   }
 
   async findOne(filter: Record<string, unknown>): Promise<IItem | null> {
-    return Item.findOne(filter).lean() as Promise<IItem | null>;
+    return prisma.item.findFirst({ where: buildWhere(filter) }) as Promise<IItem | null>;
   }
 
   async create(payload: Partial<IItem>): Promise<IItem> {
-    const item = await Item.create(payload);
-    return item.toObject() as IItem;
+    return prisma.item.create({ data: payload as any }) as Promise<IItem>;
   }
 
   async updateById(id: string, payload: Partial<IItem>): Promise<IItem | null> {
-    return Item.findByIdAndUpdate(id, { $set: payload }, { new: true, runValidators: true }).lean() as Promise<IItem | null>;
+    return prisma.item.update({ where: { id }, data: payload as any }) as Promise<IItem>;
   }
 
   async deleteById(id: string): Promise<IItem | null> {
-    return Item.findByIdAndDelete(id).lean() as Promise<IItem | null>;
+    return prisma.item.delete({ where: { id } }) as Promise<IItem>;
   }
 
   async existsByName(name: string, excludeId?: string | null): Promise<boolean> {
-    const filter: Record<string, unknown> = { name: new RegExp(`^${name}$`, 'i') };
-    if (excludeId) filter['_id'] = { $ne: excludeId };
-    return !!(await Item.exists(filter));
+    const item = await prisma.item.findFirst({
+      where: {
+        name: { equals: name },
+        ...(excludeId ? { NOT: { id: excludeId } } : {}),
+      },
+      select: { id: true },
+    });
+    return !!item;
   }
+}
+
+function buildWhere(filter: Record<string, unknown>) {
+  return Object.keys(filter).length ? filter : undefined;
 }
 
 export default new ItemRepository();

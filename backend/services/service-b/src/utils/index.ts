@@ -4,7 +4,7 @@ import { IRecord, IJob, IApplication } from '../models/types';
 import { GrpcRecordDto, GrpcJobDto, GrpcApplicationDto } from './types';
 
 export const recordToGrpc = (record: IRecord): GrpcRecordDto => ({
-  id:        record._id?.toString() ?? record.id ?? '',
+  id:        record.id ?? '',
   title:     record.title     ?? '',
   content:   record.content   ?? '',
   status:    record.status    ?? 'active',
@@ -14,7 +14,7 @@ export const recordToGrpc = (record: IRecord): GrpcRecordDto => ({
 });
 
 export const jobToGrpc = (job: IJob): GrpcJobDto => ({
-  id:                 job._id?.toString() ?? job.id ?? '',
+  id:                 job.id ?? '',
   title:              job.title              ?? '',
   description:        job.description        ?? '',
   department:         job.department         ?? '',
@@ -27,7 +27,7 @@ export const jobToGrpc = (job: IJob): GrpcJobDto => ({
 });
 
 export const applicationToGrpc = (app: IApplication): GrpcApplicationDto => ({
-  id:                app._id?.toString() ?? app.id ?? '',
+  id:                app.id ?? '',
   userId:            app.userId            ?? '',
   jobId:             app.jobId             ?? '',
   resumeUrl:         app.resumeUrl         ?? '',

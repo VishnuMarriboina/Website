@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  name         String   @db.VarChar(200)
+  email        String   @unique @db.VarChar(300)
+  passwordHash String   @db.VarChar(300)
+  role         String   @default("ADMIN") @db.VarChar(50)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("admins")
+}
+
+model RefreshToken {
+  id          String    @id @default(cuid())
+  tokenHash   String    @unique @db.VarChar(300)
+  subjectId   String    @db.VarChar(36)
+  subjectType String    @db.VarChar(20)
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([subjectId])
+  @@map("refresh_tokens")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String   @db.VarChar(200)
+  email        String   @unique @db.VarChar(300)
+  passwordHash String   @db.VarChar(300)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(200)
+  description String   @default("") @db.VarChar(2000)
+  category    String   @default("") @db.VarChar(100)
+  image       String   @default("") @db.VarChar(500)
+  price       Float    @default(0)
+  stock       Int      @default(0)
+  status      String   @default("active") @db.VarChar(50)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([name])
+  @@index([status])
+  @@index([category])
+  @@map("products")
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  userId        String      @db.VarChar(36)
+  totalAmount   Float       @default(0)
+  orderStatus   String      @default("pending") @db.VarChar(50)
+  paymentStatus String      @default("pending") @db.VarChar(50)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  items         OrderItem[]
+
+  @@index([userId])
+  @@index([orderStatus])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String @id @default(cuid())
+  orderId     String @db.VarChar(36)
+  productId   String @db.VarChar(36)
+  productName String @db.VarChar(200)
+  quantity    Int
+  price       Float
+  order       Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model Cart {
+  id          String     @id @default(cuid())
+  userId      String     @unique @db.VarChar(36)
+  totalAmount Float      @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  items       CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id          String @id @default(cuid())
+  cartId      String @db.VarChar(36)
+  productId   String @db.VarChar(36)
+  productName String @db.VarChar(200)
+  quantity    Int
+  price       Float
+  cart        Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+  @@index([cartId])
+  @@map("cart_items")
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(200)
+  description String   @default("") @db.VarChar(1000)
+  status      String   @default("active") @db.VarChar(50)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([name])
+  @@index([status])
+  @@map("items")
+}

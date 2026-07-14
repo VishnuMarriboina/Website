@@ -1,0 +1,14 @@
+version: v2
+modules:
+  - path: .
+lint:
+  use:
+    - MINIMAL
+  except:
+    # Files live flat under proto/ instead of per-package directories —
+    # restructuring that is out of scope for this change.
+    - DIRECTORY_SAME_PACKAGE
+    - PACKAGE_DIRECTORY_MATCH
+breaking:
+  use:
+    - FILE

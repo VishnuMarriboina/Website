@@ -4,7 +4,7 @@ export interface GrpcConfig {
 }
 
 export interface DbConfig {
-  uri: string;
+  url: string;
 }
 
 export interface ServiceEndpoint {

@@ -70,7 +70,7 @@ function LoginForm({ onSuccess }: AuthFormProps) {
     if (!validate()) return;
     try {
       const result = await loginUser({ email: form.email.trim().toLowerCase(), password: form.password });
-      setCredentials(result.token, result.user);
+      setCredentials(result.token, result.refreshToken, result.user);
       onSuccess(result.user.name, result.user.role);
     } catch { /* shown via apiError */ }
   };
@@ -131,7 +131,7 @@ function RegisterForm({ onSuccess }: AuthFormProps) {
         email:    form.email.trim().toLowerCase(),
         password: form.password,
       });
-      setCredentials(result.token, result.user);
+      setCredentials(result.token, result.refreshToken, result.user);
       onSuccess(result.user.name, result.user.role);
     } catch { /* shown via apiError */ }
   };

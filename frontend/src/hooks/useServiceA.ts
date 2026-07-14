@@ -66,7 +66,7 @@ export function useItem(id: string) {
 // ── Mutations ─────────────────────────────────────────────────────────────────
 
 export function useCreateItem() {
-  const qc = useQueryClient();
+  const qc = useQueryClient();  //useQueryClient give access to the React Query Cache. It is similar like useDispatch()
   return useMutation({
     mutationFn: (body: CreateItemRequest) => serviceAClient.create(body),
     onSuccess:  () => qc.invalidateQueries({ queryKey: serviceAKeys.items }),
@@ -106,6 +106,21 @@ export function useRegister() {
     mutationFn: (body: { name: string; email: string; password: string }) =>
       serviceAClient.register(body),
   });
+}
+
+// Clears local session state immediately, then best-effort revokes the
+// refresh token server-side (a failed revoke call shouldn't block logout —
+// the token will simply expire on its own).
+export function useLogout() {
+  const clearAuth = useAuthStore((s) => s.logout);
+
+  return () => {
+    const { refreshToken } = useAuthStore.getState();
+    clearAuth();
+    if (refreshToken) {
+      serviceAClient.logout({ refreshToken }).catch(() => {});
+    }
+  };
 }
 
 // ── Product queries ───────────────────────────────────────────────────────────
@@ -233,7 +248,7 @@ export function useCart() {
     queryKey: serviceAKeys.cart,
     queryFn:  () => serviceAClient.getCart(),
     enabled:  !!token,
-    staleTime: 0,
+    staleTime: 30_000,
     gcTime:    5 * 60_000,
   });
 }

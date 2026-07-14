@@ -1,3 +1,4 @@
+
 'use strict';
 
 import * as grpc from '@grpc/grpc-js';
@@ -31,7 +32,7 @@ export const GetAllUsers = async (
       success: true,
       message: 'Users retrieved successfully',
       data: users.map((u) => ({
-        id:        (u._id ?? u.id)?.toString() ?? '',
+        id:        u.id ?? '',
         name:      u.name,
         email:     u.email,
         role:      'USER',

@@ -18,6 +18,8 @@ export interface ServiceAClient {
   deleteItem:       (r: GrpcRequest,  m?: GrpcMetadata) => Promise<GrpcResponse>;
   register:         (r: GrpcRequest,  m?: GrpcMetadata) => Promise<GrpcResponse>;
   login:            (r: GrpcRequest,  m?: GrpcMetadata) => Promise<GrpcResponse>;
+  refreshToken:     (r: GrpcRequest,  m?: GrpcMetadata) => Promise<GrpcResponse>;
+  logout:           (r: GrpcRequest,  m?: GrpcMetadata) => Promise<GrpcResponse>;
   // Admin
   adminLogin:       (r: GrpcRequest,  m?: GrpcMetadata) => Promise<GrpcResponse>;
   // Product

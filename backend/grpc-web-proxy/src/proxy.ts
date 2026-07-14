@@ -14,6 +14,12 @@ import {
   logError,
   logDecodeError,
 } from './grpcLogger';
+import { checkRateLimit } from './rateLimiter';
+import config from './config';
+
+// Auth RPCs are the brute-forceable surface — rate limit by client IP regardless
+// of which downstream service/method they hit.
+const RATE_LIMITED_METHODS = new Set(['Login', 'Register', 'AdminLogin', 'RefreshToken']);
 
 const PROTO_DIR = path.join(__dirname, '../../proto');
 
@@ -32,6 +38,8 @@ const SERVICE_MAP: ServiceMap = {
     Delete:           { fn: (r, m) => serviceA.deleteItem(r, m),       req: 'servicea.DeleteItemRequest',      res: 'servicea.StatusResponse'       },
     Register:         { fn: (r, m) => serviceA.register(r, m),         req: 'servicea.RegisterRequest',        res: 'servicea.AuthResponse'         },
     Login:            { fn: (r, m) => serviceA.login(r, m),            req: 'servicea.LoginRequest',           res: 'servicea.AuthResponse'         },
+    RefreshToken:     { fn: (r, m) => serviceA.refreshToken(r, m),     req: 'servicea.RefreshTokenRequest',    res: 'servicea.AuthResponse'         },
+    Logout:           { fn: (r, m) => serviceA.logout(r, m),           req: 'servicea.RefreshTokenRequest',    res: 'servicea.StatusResponse'       },
     // Admin
     AdminLogin:       { fn: (r, m) => serviceA.adminLogin(r, m),       req: 'servicea.AdminLoginRequest',      res: 'servicea.AdminAuthResponse'    },
     // Product
@@ -149,6 +157,18 @@ export const handleGrpcWeb = async (req: Request, res: Response): Promise<void> 
     || generateProxyId();
 
   const clientIp = extractClientIp(req);
+
+  if (RATE_LIMITED_METHODS.has(method)) {
+    const { allowed, retryAfterSec } = checkRateLimit(
+      `${clientIp}:${method}`,
+      config.rateLimit.windowMs,
+      config.rateLimit.max,
+    );
+    if (!allowed) {
+      res.send(encodeTrailerFrame(8, `Too many attempts. Try again in ${retryAfterSec}s.`));
+      return;
+    }
+  }
 
   // Forward auth + correlation ID as gRPC metadata into service-a/b
   const authHeader = req.headers['authorization'] as string | undefined;

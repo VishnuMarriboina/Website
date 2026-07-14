@@ -1,73 +1,111 @@
 'use strict';
 
-import Cart from '../models/cartModel';
+import prisma from '../config/prisma';
 import { ICart, ICartItem } from '../models/types';
+
+function toICart(c: any): ICart {
+  return {
+    id:          c.id,
+    userId:      c.userId,
+    items:       (c.items ?? []).map((i: any): ICartItem => ({
+      productId:   i.productId,
+      productName: i.productName,
+      quantity:    i.quantity,
+      price:       i.price,
+    })),
+    totalAmount: c.totalAmount,
+    createdAt:   c.createdAt,
+    updatedAt:   c.updatedAt,
+  };
+}
 
 class CartRepository {
   async findByUserId(userId: string): Promise<ICart | null> {
-    return Cart.findOne({ userId }).lean() as Promise<ICart | null>;
+    const c = await prisma.cart.findUnique({ where: { userId }, include: { items: true } });
+    return c ? toICart(c) : null;
   }
 
   async upsertItem(userId: string, item: ICartItem): Promise<ICart> {
-    const cart = await Cart.findOneAndUpdate(
-      { userId },
-      { $setOnInsert: { userId, items: [], totalAmount: 0 } },
-      { upsert: true, new: true, runValidators: true }
-    );
+    const result = await prisma.$transaction(async (tx) => {
+      const cart = await tx.cart.upsert({
+        where:  { userId },
+        create: { userId, totalAmount: 0 },
+        update: {},
+      });
 
-    const idx = cart.items.findIndex((i) => i.productId === item.productId);
-    if (idx >= 0) {
-      cart.items[idx].quantity += item.quantity;
-    } else {
-      cart.items.push(item);
-    }
+      const existing = await tx.cartItem.findUnique({
+        where: { cartId_productId: { cartId: cart.id, productId: item.productId } },
+      });
 
-    cart.totalAmount = cart.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    await cart.save();
-    return cart.toObject() as ICart;
+      if (existing) {
+        await tx.cartItem.update({
+          where: { cartId_productId: { cartId: cart.id, productId: item.productId } },
+          data:  { quantity: { increment: item.quantity } },
+        });
+      } else {
+        await tx.cartItem.create({
+          data: {
+            cartId:      cart.id,
+            productId:   item.productId,
+            productName: item.productName,
+            quantity:    item.quantity,
+            price:       item.price,
+          },
+        });
+      }
+
+      const items       = await tx.cartItem.findMany({ where: { cartId: cart.id } });
+      const totalAmount = items.reduce((s, i) => s + i.price * i.quantity, 0);
+      return tx.cart.update({ where: { id: cart.id }, data: { totalAmount }, include: { items: true } });
+    });
+    return toICart(result);
   }
 
   async updateItemQuantity(userId: string, productId: string, quantity: number): Promise<ICart | null> {
-    const cart = await Cart.findOne({ userId });
+    const cart = await prisma.cart.findUnique({ where: { userId } });
     if (!cart) return null;
 
-    const idx = cart.items.findIndex((i) => i.productId === productId);
-    if (idx < 0) return cart.toObject() as ICart;
-
     if (quantity <= 0) {
-      cart.items.splice(idx, 1);
+      await prisma.cartItem.deleteMany({ where: { cartId: cart.id, productId } });
     } else {
-      cart.items[idx].quantity = quantity;
+      await prisma.cartItem.updateMany({
+        where: { cartId: cart.id, productId },
+        data:  { quantity },
+      });
     }
 
-    cart.totalAmount = cart.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    await cart.save();
-    return cart.toObject() as ICart;
+    const items       = await prisma.cartItem.findMany({ where: { cartId: cart.id } });
+    const totalAmount = items.reduce((s, i) => s + i.price * i.quantity, 0);
+    const updated     = await prisma.cart.update({ where: { id: cart.id }, data: { totalAmount }, include: { items: true } });
+    return toICart(updated);
   }
 
   async removeItem(userId: string, productId: string): Promise<ICart | null> {
-    const cart = await Cart.findOne({ userId });
+    const cart = await prisma.cart.findUnique({ where: { userId } });
     if (!cart) return null;
 
-    cart.items = cart.items.filter((i) => i.productId !== productId);
-    cart.totalAmount = cart.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-    await cart.save();
-    return cart.toObject() as ICart;
+    await prisma.cartItem.deleteMany({ where: { cartId: cart.id, productId } });
+    const items       = await prisma.cartItem.findMany({ where: { cartId: cart.id } });
+    const totalAmount = items.reduce((s, i) => s + i.price * i.quantity, 0);
+    const updated     = await prisma.cart.update({ where: { id: cart.id }, data: { totalAmount }, include: { items: true } });
+    return toICart(updated);
   }
 
   async clearCart(userId: string): Promise<void> {
-    await Cart.findOneAndUpdate(
-      { userId },
-      { $set: { items: [], totalAmount: 0 } }
-    );
+    const cart = await prisma.cart.findUnique({ where: { userId } });
+    if (!cart) return;
+    await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
+    await prisma.cart.update({ where: { id: cart.id }, data: { totalAmount: 0 } });
   }
 
   async getOrCreate(userId: string): Promise<ICart> {
-    let cart = await Cart.findOne({ userId });
-    if (!cart) {
-      cart = await Cart.create({ userId, items: [], totalAmount: 0 });
-    }
-    return cart.toObject() as ICart;
+    const c = await prisma.cart.upsert({
+      where:   { userId },
+      create:  { userId, totalAmount: 0 },
+      update:  {},
+      include: { items: true },
+    });
+    return toICart(c);
   }
 }
 

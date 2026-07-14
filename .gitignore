@@ -88,3 +88,8 @@ secrets/
 # Temp
 tmp/
 temp/
+
+# Local-only docs
+docs/
+PROJECT_PIPELINE.md
+**/PROJECT_PIPELINE.md

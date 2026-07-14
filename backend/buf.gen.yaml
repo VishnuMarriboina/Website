@@ -1,0 +1,27 @@
+version: v2
+# Generates plain TypeScript interfaces from the .proto messages — no
+# encode/decode/service code, so it adds zero runtime dependencies or
+# behavior. Backend services keep using @grpc/proto-loader and the frontend
+# keeps using its protobufjs descriptor pipeline (scripts/generate-proto.sh)
+# for wire (de)serialization; these generated files exist only so every
+# consumer shares one compile-time source of truth for message shapes
+# instead of hand-copied interfaces that can drift from the .proto files.
+plugins:
+  - local: protoc-gen-ts_proto
+    out: services/service-a/src/generated
+    opt: &ts_proto_opts
+      - outputServices=none
+      - outputEncodeMethods=false
+      - outputJsonMethods=false
+      - outputClientImpl=false
+      - useOptionals=messages
+      - esModuleInterop=true
+  - local: protoc-gen-ts_proto
+    out: services/service-b/src/generated
+    opt: *ts_proto_opts
+  - local: protoc-gen-ts_proto
+    out: grpc-web-proxy/src/generated
+    opt: *ts_proto_opts
+  - local: protoc-gen-ts_proto
+    out: ../frontend/src/grpc/generated
+    opt: *ts_proto_opts

@@ -7,6 +7,7 @@ import {
 import Lottie from 'react-lottie';
 import type { Options } from 'react-lottie';
 import { useAuthStore } from '../../store/authStore';
+import { useLogout } from '../../hooks/useServiceA';
 import logoAnim from '../../assets/logo.json';
 
 const navItems = [
@@ -23,7 +24,7 @@ const navItems = [
 function Sidebar({ onClose }: { onClose?: () => void }) {
   const navigate  = useNavigate();
   const user      = useAuthStore((s) => s.user);
-  const logout    = useAuthStore((s) => s.logout);
+  const logout    = useLogout();
 
   const handleLogout = () => {
     logout();

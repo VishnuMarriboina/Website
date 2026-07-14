@@ -1,18 +1,17 @@
-import { Types } from 'mongoose';
+'use strict';
 
 export interface IRecord {
-  _id?:      Types.ObjectId;
-  title:     string;
-  content:   string;
-  status:    string;
-  refId:     string;
+  id:         string;
+  title:      string;
+  content:    string;
+  status:     string;
+  refId:      string;
   createdAt?: Date;
   updatedAt?: Date;
-  id?:        string;
 }
 
 export interface IJob {
-  _id?:               Types.ObjectId;
+  id:                 string;
   title:              string;
   description:        string;
   department:         string;
@@ -22,17 +21,15 @@ export interface IJob {
   status:             string;
   createdAt?:         Date;
   updatedAt?:         Date;
-  id?:                string;
 }
 
 export interface IApplication {
-  _id?:               Types.ObjectId;
-  userId:             string;
-  jobId:              string;
-  resumeUrl:          string;
-  coverLetter:        string;
-  applicationStatus:  string;
-  createdAt?:         Date;
-  updatedAt?:         Date;
-  id?:                string;
+  id:                string;
+  userId:            string;
+  jobId:             string;
+  resumeUrl:         string;
+  coverLetter:       string;
+  applicationStatus: string;
+  createdAt?:        Date;
+  updatedAt?:        Date;
 }

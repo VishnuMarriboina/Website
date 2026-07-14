@@ -22,6 +22,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -31,6 +33,21 @@ jobs:
 
       - name: Install root deps
         run: npm install
+
+      - name: Install backend deps
+        run: npm --prefix backend install
+
+      - name: Lint protobuf schemas
+        run: npm --prefix backend run proto:lint
+
+      - name: Check protobuf formatting
+        run: npm --prefix backend run proto:format:check
+
+      - name: Check protobuf breaking changes
+        run: npx --prefix ./backend buf breaking backend/proto --against ".git#ref=origin/main,subdir=backend/proto"
+
+      - name: Generate proto TypeScript types
+        run: npm --prefix backend run proto:generate
 
       - name: Install service deps
         run: bash scripts/install-all.sh

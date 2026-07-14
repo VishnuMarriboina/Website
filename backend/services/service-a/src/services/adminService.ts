@@ -12,13 +12,13 @@ const SALT_ROUNDS = 10;
 
 const generateAdminToken = (admin: IAdmin): string =>
   jwt.sign(
-    { id: admin._id?.toString(), email: admin.email, name: admin.name, role: 'ADMIN' },
+    { id: admin.id, email: admin.email, name: admin.name, role: 'ADMIN' },
     config.jwt.secret,
-    { expiresIn: config.jwt.expiresIn as jwt.SignOptions['expiresIn'] }
+    { expiresIn: config.jwt.accessExpiresIn as jwt.SignOptions['expiresIn'] }
   );
 
 const adminToDto = (admin: IAdmin): AdminDto => ({
-  id:        admin._id?.toString() ?? '',
+  id:        admin.id ?? '',
   name:      admin.name,
   email:     admin.email,
   role:      admin.role,

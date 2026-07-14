@@ -1,4 +1,5 @@
 import * as grpc from '@grpc/grpc-js';
+import * as ServiceA from '../../generated/service-a';
 
 export type UnaryCall<Req = Record<string, unknown>> =
   grpc.ServerUnaryCall<Req, Record<string, unknown>>;
@@ -11,45 +12,46 @@ export interface GrpcError {
   details: string;
 }
 
-// ── Request / response shapes (match proto definitions) ──────────────────────
+// ── Request / response shapes — sourced from the generated proto types so
+//    they can't drift from backend/proto/service-a.proto. Names are kept
+//    as-is so handler files don't need to change their imports. ────────────
 
-export interface HealthCheckReq {}
-export interface HealthCheckRes {
-  status:    string;
-  service:   string;
-  timestamp: string;
-}
+export type HealthCheckReq = ServiceA.HealthCheckRequest;
+export type HealthCheckRes = ServiceA.HealthCheckResponse;
 
-export interface GetByIdReq    { id: string }
-export interface GetAllReq     { page: number; limit: number; status: string; search: string }
-export interface CreateItemReq { name: string; description: string; status: string }
-export interface UpdateItemReq { id: string; name: string; description: string; status: string }
-export interface DeleteItemReq { id: string }
+export type GetByIdReq    = ServiceA.GetByIdRequest;
+export type GetAllReq     = ServiceA.GetAllRequest;
+export type CreateItemReq = ServiceA.CreateItemRequest;
+export type UpdateItemReq = ServiceA.UpdateItemRequest;
+export type DeleteItemReq = ServiceA.DeleteItemRequest;
 
-export interface RegisterReq   { name: string; email: string; password: string }
-export interface LoginReq      { email: string; password: string }
+export type RegisterReq     = ServiceA.RegisterRequest;
+export type LoginReq        = ServiceA.LoginRequest;
+export type RefreshTokenReq = ServiceA.RefreshTokenRequest;
+export type LogoutReq       = ServiceA.RefreshTokenRequest;
 
 // ── Admin ──────────────────────────────────────────────────────────────────────
-export interface AdminLoginReq { email: string; password: string }
+export type AdminLoginReq = ServiceA.AdminLoginRequest;
 
 // ── Product ───────────────────────────────────────────────────────────────────
-export interface GetProductsReq  { page: number; limit: number; status: string; category: string; search: string }
-export interface CreateProductReq { name: string; description: string; category: string; image: string; price: number; stock: number; status: string }
-export interface UpdateProductReq { id: string; name: string; description: string; category: string; image: string; price: number; stock: number; status: string }
-export interface DeleteProductReq { id: string }
+export type GetProductsReq   = ServiceA.GetProductsRequest;
+export type CreateProductReq = ServiceA.CreateProductRequest;
+export type UpdateProductReq = ServiceA.UpdateProductRequest;
+// DeleteProduct rpc reuses DeleteItemRequest on the wire (see service-a.proto).
+export type DeleteProductReq = ServiceA.DeleteItemRequest;
 
 // ── Order ─────────────────────────────────────────────────────────────────────
-export interface CreateOrderReq   { userId: string; productId: string; quantity: number }
-export interface GetOrdersReq     { page: number; limit: number; orderStatus: string }
-export interface GetUserOrdersReq { userId: string; page: number; limit: number }
+export type CreateOrderReq   = ServiceA.CreateOrderRequest;
+export type GetOrdersReq     = ServiceA.GetOrdersRequest;
+export type GetUserOrdersReq = ServiceA.GetUserOrdersRequest;
 
 // ── Cart ──────────────────────────────────────────────────────────────────────
-export interface AddToCartReq        { productId: string; quantity: number }
-export interface UpdateCartItemReq   { productId: string; quantity: number }
-export interface RemoveFromCartReq   { productId: string }
+export type AddToCartReq      = ServiceA.AddToCartRequest;
+export type UpdateCartItemReq = ServiceA.UpdateCartItemRequest;
+export type RemoveFromCartReq = ServiceA.RemoveFromCartRequest;
 
 // ── User management (admin) ────────────────────────────────────────────────────
-export interface GetUsersReq { page: number; limit: number }
+export type GetUsersReq = ServiceA.GetUsersRequest;
 
 // ── Order status update (admin) ───────────────────────────────────────────────
-export interface UpdateOrderStatusReq { id: string; orderStatus: string }
+export type UpdateOrderStatusReq = ServiceA.UpdateOrderStatusRequest;
